@@ -5,7 +5,7 @@
 
 [![CI](https://github.com/gokulsenthilkumar3/lang-design/actions/workflows/ci.yml/badge.svg)](https://github.com/gokulsenthilkumar3/lang-design/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![RFCs](https://img.shields.io/badge/RFCs-2%20active-green.svg)](rfcs/)
+[![RFCs](https://img.shields.io/badge/RFCs-3%20active-green.svg)](rfcs/)
 [![Status](https://img.shields.io/badge/phase-design%20%26%20research-orange.svg)](#roadmap)
 
 ---
@@ -134,6 +134,7 @@ For a shorter execution-oriented view, see
 | ---------------------------------------------------------------------------- | ---------------------------- | ------ |
 | [RFC-0001](rfcs/RFC-0001-language-vision-and-non-goals.md)                   | Language Vision and Non-Goals | Draft |
 | [RFC-0002](rfcs/RFC-0002-syntax-philosophy.md)                               | Syntax Philosophy             | Draft |
+| [RFC-0003](rfcs/RFC-0003-grammar.md)                                         | Grammar                       | Draft |
 
 ---
 
