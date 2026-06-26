@@ -1,11 +1,11 @@
 # RFC-XXXX: Title
 
-**Status:** Draft | Active | Accepted | Rejected | Superseded  
-**Author:** Your Name  
-**Created:** YYYY-MM-DD  
-**Updated:** YYYY-MM-DD  
-**Supersedes:** RFC-XXXX (if applicable)  
-**Superseded by:** RFC-XXXX (if applicable)  
+**Status:** Draft | Active | Accepted | Rejected | Superseded\
+**Author:** Your Name\
+**Created:** YYYY-MM-DD\
+**Updated:** YYYY-MM-DD\
+**Supersedes:** RFC-XXXX (if applicable)\
+**Superseded by:** RFC-XXXX (if applicable)
 
 ---
 
@@ -23,11 +23,12 @@ Why is this needed? What problem does it solve? What is the current pain point?
 
 ## Detailed Design
 
-The full proposal. Use syntax sketches, diagrams, examples, and pseudocode as needed.
+The full proposal. Use syntax sketches, diagrams, examples, and pseudocode
+as needed.
 
 ### Syntax
 
-```
+```lang
 // Syntax sketch here
 ```
 
@@ -47,19 +48,19 @@ How does this affect the compiler, package manager, LSP, or formatter?
 
 ## Benchmark Targets
 
-| Metric | Target | Rationale |
-|--------|--------|----------|
-| Example: compile time regression | < 5% | Compile speed is a user-visible quality |
+| Metric                      | Target  | Rationale                              |
+| --------------------------- | ------- | -------------------------------------- |
+| Example: compile time delta | < 5%    | Compile speed is a user-visible metric |
 
 ---
 
 ## Innovation Backlog
 
-| Option | Description | Tradeoff |
-|--------|-------------|----------|
-| Option A | ... | ... |
-| Option B | ... | ... |
-| **Chosen** | ... | Why this one |
+| Option       | Description | Tradeoff    |
+| ------------ | ----------- | ----------- |
+| Option A     | ...         | ...         |
+| Option B     | ...         | ...         |
+| **Chosen**   | ...         | Why this one |
 
 ---
 

@@ -1,220 +1,283 @@
-# Roadmap
-
-This document tracks the phased development plan for the language. Each phase has a defined duration, key deliverable, and explicit success criteria. Phases do not begin until the preceding Go/No-Go gate is passed.
+# Language Development Roadmap
 
 ---
 
 ## Phase 0 — Language Specification
+
 **Duration:** 6 months | **Status:** Active
 
 ### Goal
-Produce a complete, unambiguous, formally reviewed language specification before any implementation begins. Architecture decisions made here are the hardest to reverse.
+
+Produce a complete, unambiguous, formally reviewed language specification
+covering syntax, type system, memory model, and effect system. Every subsequent
+phase depends on this document being stable.
 
 ### Deliverables
-- RFC-0001 through RFC-0010 (core language model)
-- Formal grammar in EBNF and PEG
-- Type system formal specification (paper-level detail)
-- Memory model formal specification
-- Effect system design document
-- Benchmark baseline: measure Rust, Go, Python, C++ on target workloads
-- Threat model for compiler supply chain
-- Hardware and platform support matrix
+
+- RFC-0001 through RFC-0010 (core language decisions, all Accepted)
+- Formal grammar (EBNF) for the full language surface syntax
+- Type system specification with decision procedure
+- Memory model: affine ownership + region inference rules
+- Effect system: capability declarations and algebraic effect handlers
+- Benchmark targets document (compile time, binary size, runtime baselines)
 
 ### Success Criteria (Gate 1)
-- All RFC-0001–0010 approved by TSC
-- Grammar is provably unambiguous (tested with a reference parser)
-- Type system has no known soundness holes
-- At least 3 external reviewers have reviewed the type system spec
+
+- All RFC-0001–0010 approved by at least 3 reviewers
+- Grammar is unambiguous (verified by automated parser generator)
+- No open questions in RFC-0001 (vision) remain unresolved
 
 ---
 
 ## Phase 1 — Lexer & Parser
-**Duration:** 6 months | **Status:** Not started
+
+**Duration:** 4 months | **Status:** Not started
+
+**Depends on:** Phase 0 complete (Grammar RFC accepted)
 
 ### Goal
-Implement a complete, correct parser for the Phase 0 grammar with good error recovery and a clean AST.
+
+Implement a hand-written recursive-descent parser producing a complete,
+spanned AST. Error recovery must be good enough that the parser continues
+after a syntax error and reports all errors in one pass.
 
 ### Deliverables
+
 - Hand-written recursive-descent parser (no parser generator)
-- Full lexer with Unicode support
-- AST design document and implementation
-- Error recovery: parser continues after syntax errors and reports all errors in one pass
-- Parser test suite covering 100% of grammar productions
-- Syntax highlighting grammar for VS Code and Neovim
+- Fully spanned AST (every node carries source location)
+- Error recovery: parser continues after syntax errors
+- Round-trip property: `parse(print(ast)) == ast`
+- Fuzzing harness: parser must not panic on any input
+- 100% of RFC-0002 syntax principles covered by parser tests
 
 ---
 
 ## Phase 2 — Type System
-**Duration:** 12 months | **Status:** Not started
+
+**Duration:** 6 months | **Status:** Not started
+
+**Depends on:** Phase 1 complete
 
 ### Goal
-Implement the full type checker including ownership inference, the gradual formalism layer, and the effect system.
+
+Implement Hindley-Milner type inference extended with: affine types,
+refinement types (opt-in), algebraic effects, and first-class tensor shape
+types. The type checker must produce actionable error messages, not type
+variable dumps.
 
 ### Deliverables
-- Hindley-Milner type inference core
-- Affine ownership checker (borrow inference without explicit lifetime annotations)
-- Refinement type layer (opt-in proof obligations)
-- Algebraic effect type checker
-- AI/tensor shape types
-- Type error messages: every error links to documentation and suggests a fix
-- Type system test suite: all spec test cases pass
+
+- Hindley-Milner type inference core (Algorithm W + extensions)
+- Affine type checker (ownership, move, borrow)
+- Region inference (no explicit lifetime annotations in common cases)
+- Refinement type checker (opt-in, `#[verify]` attribute)
+- Effect type checker (capability declarations, handler typing)
+- Tensor shape types (`Tensor[Float32, (M, N)]`, shape inference)
+- Error message quality benchmark: 90% of type errors produce actionable messages
 
 ---
 
 ## Phase 3 — IR & Optimiser
-**Duration:** 12 months | **Status:** Not started
+
+**Duration:** 5 months | **Status:** Not started
+
+**Depends on:** Phase 2 complete
 
 ### Goal
-Design and implement the intermediate representation and initial optimisation passes.
+
+Design and implement a Static Single Assignment IR. Implement a core set of
+optimisation passes. The IR must be serialisable (for debugging and
+cross-compilation caching).
 
 ### Deliverables
+
 - SSA-form IR specification
-- Lowering pass from typed AST to IR
-- LLVM backend (initial)
-- Cranelift backend (WASM target)
-- Optimisation passes: constant folding, dead code elimination, inlining
-- IR test suite
-- Benchmark: compilation speed ≥ 500k loc/s
+- AST → IR lowering pass
+- Optimisation passes: dead code elimination, constant folding,
+  inlining (up to configurable depth), escape analysis
+- IR serialisation format (binary + human-readable text)
+- Optimisation benchmark: measure compile-time vs runtime tradeoff at `-O0`,
+  `-O1`, `-O2`
 
 ---
 
 ## Phase 4 — Multi-Architecture Codegen
-**Duration:** 12 months | **Status:** Not started
+
+**Duration:** 6 months | **Status:** Not started
+
+**Depends on:** Phase 3 complete
 
 ### Deliverables
+
 - x86-64 native target (Linux, macOS, Windows)
 - ARM64 native target (Linux, macOS/Apple Silicon)
+- RISC-V target (Linux)
 - WebAssembly target (WASI + browser)
-- RISC-V target (research/embedded)
-- Cross-compilation support
-- Benchmark: runtime throughput ≥ 85% of C on target workloads
+- LLVM backend (IR → LLVM IR → native, as validation and fallback)
+- Cross-compilation support (host builds target binary)
+- Benchmark: binary size, startup time, runtime performance vs C baseline
 
 ---
 
 ## Phase 5 — Runtime & Standard Library
-**Duration:** 18 months | **Status:** Not started
+
+**Duration:** 8 months | **Status:** Not started
+
+**Depends on:** Phase 4 complete
 
 ### Deliverables
-- Memory allocator (affine ownership + region model)
-- Async runtime (algebraic effects-based)
-- Green thread scheduler
-- Core stdlib: collections, strings, IO, filesystem, network
-- Error handling stdlib
-- REPL (read-eval-print loop with incremental type checking)
-- Benchmark: p99 latency ≤ 110% of Rust equivalent
+
+- Memory allocator (affine ownership region allocator + fallback general
+  allocator)
+- Async runtime (algebraic-effect-based, no implicit executor)
+- Standard collections: List, Map, Set, Queue, Deque
+- String handling: UTF-8 by default, validated at boundary
+- IO primitives: File, Network, Process (all capability-gated)
+- Error handling: Result type, `?` operator, structured error context
+- Stdlib test coverage: 95% line coverage
 
 ---
 
 ## Phase 6 — Developer Tooling
-**Duration:** 12 months | **Status:** Not started
+
+**Duration:** 6 months | **Status:** Not started
+
+**Depends on:** Phase 5 (stdlib complete enough to write tools in the language)
 
 ### Deliverables
+
 - Language Server Protocol (LSP) implementation
-  - Autocomplete (p95 < 50 ms)
-  - Inline error display
-  - Go-to-definition, find-references
-  - Refactoring: rename, extract function
-- Zero-config formatter (enforced in CI)
-- DWARF-based debugger
-- Time-travel debugging (target, not guaranteed)
-- Integrated profiler: flame graph + allocation profiler
-- VS Code extension (shipped to marketplace)
-- Neovim plugin
+  - Completions, hover, go-to-definition, find-references
+  - Inline type display, inline error display
+- Formatter (opinionated, zero-config, idempotent)
+- Linter (configurable, RFC-defined rules)
+- Debugger (DWARF debug info, GDB/LLDB compatible)
+- REPL (expression evaluation, type display, effect sandbox)
+- Build system (integrated in the main binary, no separate config format)
+- Package manager (integrated, reproducible builds, lockfile)
 
 ---
 
 ## Phase 7 — Package Ecosystem
-**Duration:** 12 months | **Status:** Not started
+
+**Duration:** 6 months | **Status:** Not started
+
+**Depends on:** Phase 6 (package manager complete)
 
 ### Deliverables
-- Package registry (public, self-hosted)
-- Dependency solver (SAT-based, reproducible)
-- Lockfile format and specification
-- Private registry support
-- SBOM generation per build
-- Package signing and verification
-- Benchmark: cold install of 100-dependency project < 10 s
-- 50+ seed packages published by core team
+
+- Package registry (public, self-hostable)
+- Package signing (all published packages must be signed)
+- SBOM generation (every package build produces a software bill of materials)
+- Dependency resolver (SAT-based, reproducible)
+- Security advisory database integration
+- `500` seed packages covering: HTTP, JSON, SQL, crypto, testing, CLI
 
 ---
 
 ## Phase 8 — Testing & Verification
-**Duration:** 12 months | **Status:** Not started
+
+**Duration:** 4 months | **Status:** Not started
+
+**Depends on:** Phase 6 (test runner), Phase 2 (refinement types)
 
 ### Deliverables
-- Built-in test runner (no external framework needed)
-- Property-based testing library
-- Compiler fuzzer (find parser and type-checker bugs)
-- Formal verification bridge to Lean 4
-- Proof coverage target: ≥ 80% of stdlib critical paths by v1.0
-- Benchmark and regression suite integrated into CI
+
+- Built-in test runner (no external framework required)
+- Property-based testing (`forall` in stdlib)
+- Compiler fuzzer (differential testing against reference interpreter)
+- Kernel fuzzer (if OS integration is in scope)
+- Formal verification integration: export proof obligations to Lean 4
+- Chaos / fault injection test harness
+- Benchmark runner (statistical, reports p50/p95/p99)
 
 ---
 
 ## Phase 9 — Documentation & Community
-**Duration:** 6 months | **Status:** Not started
+
+**Duration:** 4 months | **Status:** Not started
+
+**Depends on:** Phase 7 (ecosystem exists to document)
 
 ### Deliverables
-- Full language reference (every feature documented)
-- Getting started guide (from zero to first project in 30 minutes)
-- Cookbook (idiomatic solutions to 50 common problems)
-- Browser playground (WASM-compiled compiler)
-- AI assistant trained on stdlib and idioms (integrated into LSP)
-- RFC archive published and searchable
-- Community forum or discussion space
+
+- Full language reference (every construct, formally defined)
+- Tutorial: "The Language in 30 Minutes" (runnable in browser WASM playground)
+- "The Language Book" (comprehensive, Rust Book-style)
+- API documentation generator (integrated in toolchain)
+- Community forum or GitHub Discussions structure
+- Governance: RFC process published, TSC charter, security response policy
+- Three university course pilot programmes
 
 ---
 
 ## Phase 10 — Hardening & Audit
-**Duration:** 12 months | **Status:** Not started
+
+**Duration:** 6 months | **Status:** Not started
+
+**Depends on:** Phase 9 (language is stable enough for external audit)
 
 ### Deliverables
-- Compiler fuzzing campaign (minimum 1000 CPU-hours)
-- External security audit
-- ABI stability guarantee documented and enforced
-- Deprecation policy enforced in CI
-- Zero known critical CVEs at release
-- Reproducible build verification by independent party
+
+- Compiler fuzzing campaign (minimum 10 billion inputs)
+- External security audit of compiler and stdlib
+- ABI stability guarantee published (first stable ABI)
+- Reproducible build verification (independent rebuild produces identical binary)
+- CVE response process exercised (at least one dry-run disclosure)
+- Performance regression suite (blocks release if any benchmark regresses >2%)
 
 ---
 
 ## Phase 11 — GPU & AI Standard Library
-**Duration:** 18 months | **Status:** Not started
+
+**Duration:** 6 months | **Status:** Not started
+
+**Depends on:** Phase 5 (stdlib), Phase 4 (codegen)
 
 ### Deliverables
+
 - Native tensor type in stdlib
-- GPU codegen backend (NVIDIA CUDA, AMD ROCm, Intel Arc)
-- Kernel fusion optimiser
-- AI inference stdlib (forward pass, batching, quantisation)
-- Benchmark: tensor op throughput ≥ 120% of PyTorch (CPU)
-- Interop layer with Python (call Python ML libraries from this language)
+- GPU codegen backend (CUDA, ROCm, Metal)
+- Automatic differentiation in stdlib (`grad`, `jvp`, `vjp`)
+- Neural network primitives (linear, conv, attention, norm layers)
+- ONNX import/export
+- Inference server stdlib module (HTTP + gRPC)
+- AI compiler optimisations: kernel fusion, tiling, quantisation
 
 ---
 
 ## Phase 12 — Industry Adoption
+
 **Duration:** Ongoing | **Status:** Not started
 
+**Depends on:** Phase 10 (stable, audited release)
+
 ### Deliverables
+
 - v1.0 public release
-- Nonprofit foundation established (holds trademark, registry, domain)
-- Enterprise support track
-- University partnership programme (3+ universities teaching the language)
-- Certification programme
-- Annual language summit
+- Cloud provider native support (at least one major provider)
+- Foundation established (nonprofit, holds trademarks and domain)
+- Enterprise support programme (SLA, security patch guarantee)
+- Certification programme (language proficiency, for hiring)
+- OEM / hardware vendor support programme
+- 100,000 GitHub repositories using the language
 
 ---
 
-## Timeline Summary
+## Dependency Graph
 
-| Year | Milestone |
-|------|----------|
-| 1 | Language spec locked (Gate 1 passed) |
-| 2 | Self-hosting parser + type checker |
-| 3 | First compilable programs; Gate 2 passed |
-| 4 | Self-hosting compiler (Gate 3 passed) |
-| 5 | Full runtime + stdlib + REPL |
-| 6 | Complete developer tooling (LSP, debugger, formatter) |
-| 7 | Package registry live; Gate 4 passed |
-| 8 | v1.0 release |
-| 10 | GPU/AI stdlib; 3+ university courses |
-| 13 | Industry mainstream adoption target |
+| Phase | Depends On  |
+| ----- | ----------- |
+| 0     | (none)      |
+| 1     | 0           |
+| 2     | 1           |
+| 3     | 2           |
+| 4     | 3           |
+| 5     | 4           |
+| 6     | 5           |
+| 7     | 6           |
+| 8     | 6, 2        |
+| 9     | 7           |
+| 10    | 9           |
+| 11    | 5, 4        |
+| 12    | 10          |

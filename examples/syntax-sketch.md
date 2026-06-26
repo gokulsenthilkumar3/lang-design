@@ -1,12 +1,13 @@
 # Syntax Sketches
 
-This file contains illustrative syntax examples. These are design sketches, not final syntax. Everything here is subject to change through the RFC process.
+This file contains illustrative syntax examples. These are design sketches,
+not final syntax. Everything here is subject to change through the RFC process.
 
 ---
 
 ## Basic Types and Variables
 
-```
+```lang
 // Immutable binding — type inferred
 let name = "Gokul"
 let count = 42
@@ -24,7 +25,7 @@ let id: UUID = UUID.new()
 
 ## Functions
 
-```
+```lang
 // Simple function
 fn square(x: Int) -> Int {
     x * x
@@ -56,7 +57,7 @@ fn factorial(n: Nat) -> Nat {
 
 ## Structs and Enums
 
-```
+```lang
 // Struct
 struct User {
     id: UUID
@@ -88,7 +89,7 @@ enum Tree[T] {
 
 ## Pattern Matching
 
-```
+```lang
 // Match on enum
 fn describe(shape: Shape) -> Str {
     match shape {
@@ -111,10 +112,10 @@ fn classify(n: Int) -> Str {
 
 ---
 
-## Ownership and Borrowing (Sketch)
+## Ownership and Borrowing
 
-```
-// Ownership transfer (move semantics, like Rust)
+```lang
+// Ownership transfer (move semantics)
 let data = Buffer.new(1024)
 process(data)           // data is moved; cannot use data after this
 
@@ -133,7 +134,7 @@ process(data)              // move after mutable borrow ends
 
 ## Gradual Formalism (Refinement Types, Opt-In)
 
-```
+```lang
 // Informal — no proof obligations, compiles and runs
 fn divide(a: Int, b: Int) -> Int {
     a / b   // runtime panic if b == 0
@@ -160,7 +161,7 @@ fn divide_typed(a: Int, b: NonZeroInt) -> Int {
 
 ## Algebraic Effects
 
-```
+```lang
 // Define an effect
 effect Logger {
     fn log(msg: Str) -> ()
@@ -189,9 +190,9 @@ with Logger.handle(|msg| test_log.append(msg)) {
 
 ---
 
-## AI / Tensor Types (Sketch)
+## AI / Tensor Types
 
-```
+```lang
 // Tensor with shape encoded in the type
 let weights: Tensor[Float32, (768, 768)] = Tensor.zeros()
 let input:   Tensor[Float32, (1, 768)]   = embed(tokens)
