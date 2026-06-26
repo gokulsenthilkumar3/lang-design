@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520" role="img" aria-labelledby="title desc">
+  <title id="title">lang-design roadmap</title>
+  <desc id="desc">A left-to-right roadmap showing design phases from vision to adoption.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#08111f"/>
+      <stop offset="100%" stop-color="#12233f"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#203552"/>
+      <stop offset="100%" stop-color="#17304e"/>
+    </linearGradient>
+    <style>
+      .title { fill: #f6f8fb; font: 700 34px Arial, sans-serif; }
+      .subtitle { fill: #b9c7d8; font: 400 18px Arial, sans-serif; }
+      .phase { fill: #ffffff; font: 700 20px Arial, sans-serif; }
+      .body { fill: #d7e1ee; font: 400 15px Arial, sans-serif; }
+      .chip { fill: #8dd0ff; font: 700 14px Arial, sans-serif; }
+      .line { stroke: #79b8ff; stroke-width: 4; stroke-linecap: round; }
+      .arrow { fill: #79b8ff; }
+    </style>
+  </defs>
+  <rect width="1400" height="520" rx="30" fill="url(#bg)"/>
+  <text x="60" y="72" class="title">lang-design roadmap</text>
+  <text x="60" y="104" class="subtitle">Design first. RFCs define the contract. Implementation follows the contract.</text>
+
+  <line x1="120" y1="240" x2="1280" y2="240" class="line"/>
+  <polygon points="1280,240 1258,228 1258,252" class="arrow"/>
+
+  <g transform="translate(60 145)">
+    <rect width="210" height="170" rx="22" fill="url(#card)" stroke="#2d4d75" stroke-width="2"/>
+    <text x="22" y="34" class="chip">Phase 0</text>
+    <text x="22" y="68" class="phase">Vision</text>
+    <text x="22" y="100" class="body">RFC-0001, governance, and research baseline.</text>
+    <text x="22" y="128" class="body">Gate: shared north star.</text>
+  </g>
+
+  <g transform="translate(290 145)">
+    <rect width="210" height="170" rx="22" fill="url(#card)" stroke="#2d4d75" stroke-width="2"/>
+    <text x="22" y="34" class="chip">Phase 1</text>
+    <text x="22" y="68" class="phase">Syntax</text>
+    <text x="22" y="100" class="body">Grammar, syntax philosophy, and examples.</text>
+    <text x="22" y="128" class="body">Gate: unambiguous surface form.</text>
+  </g>
+
+  <g transform="translate(520 145)">
+    <rect width="210" height="170" rx="22" fill="url(#card)" stroke="#2d4d75" stroke-width="2"/>
+    <text x="22" y="34" class="chip">Phase 2</text>
+    <text x="22" y="68" class="phase">Semantics</text>
+    <text x="22" y="100" class="body">Type system, memory model, and effects.</text>
+    <text x="22" y="128" class="body">Gate: accepted core language model.</text>
+  </g>
+
+  <g transform="translate(750 145)">
+    <rect width="210" height="170" rx="22" fill="url(#card)" stroke="#2d4d75" stroke-width="2"/>
+    <text x="22" y="34" class="chip">Phase 3</text>
+    <text x="22" y="68" class="phase">Toolchain</text>
+    <text x="22" y="100" class="body">Compiler, build, package, formatter, LSP.</text>
+    <text x="22" y="128" class="body">Gate: unified developer workflow.</text>
+  </g>
+
+  <g transform="translate(980 145)">
+    <rect width="210" height="170" rx="22" fill="url(#card)" stroke="#2d4d75" stroke-width="2"/>
+    <text x="22" y="34" class="chip">Phase 4</text>
+    <text x="22" y="68" class="phase">Handoff</text>
+    <text x="22" y="100" class="body">Freeze design and move execution to impl repo.</text>
+    <text x="22" y="128" class="body">Gate: ready for bootstrap work.</text>
+  </g>
+
+  <text x="60" y="472" class="subtitle">Each phase ends with a decision gate, so implementation never outruns the spec.</text>
+</svg>

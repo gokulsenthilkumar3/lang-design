@@ -11,11 +11,11 @@ corresponding phase gate is passed.
 
 | Metric | Target | Source RFC |
 |--------|--------|------------|
-| Type check: 100k LOC | < 5 seconds | RFC-0003 |
-| Refinement check: simple predicate | < 100ms | RFC-0003 |
-| Tensor shape inference: per matmul | < 1ms | RFC-0003 |
-| Type error: actionable message rate | > 90% | RFC-0003 |
-| Compile-time regression per PR | < 2% | RFC-0003 |
+| Type check: 100k LOC | < 5 seconds | RFC-0004 |
+| Refinement check: simple predicate | < 100ms | RFC-0004 |
+| Tensor shape inference: per matmul | < 1ms | RFC-0004 |
+| Type error: actionable message rate | > 90% | RFC-0004 |
+| Compile-time regression per PR | < 2% | RFC-0004 |
 
 ---
 
@@ -23,11 +23,11 @@ corresponding phase gate is passed.
 
 | Metric | Target | Source RFC |
 |--------|--------|------------|
-| Allocation throughput | > 500M alloc/sec | RFC-0004 |
-| Deallocation throughput | > 500M dealloc/sec | RFC-0004 |
-| GC pause (safe subset) | 0ms (no GC) | RFC-0004 |
-| Region allocator overhead vs malloc | < 5% | RFC-0004 |
-| Functions needing lifetime annotations | < 10% | RFC-0004 |
+| Allocation throughput | > 500M alloc/sec | RFC-0005 |
+| Deallocation throughput | > 500M dealloc/sec | RFC-0005 |
+| GC pause (safe subset) | 0ms (no GC) | RFC-0005 |
+| Region allocator overhead vs malloc | < 5% | RFC-0005 |
+| Functions needing lifetime annotations | < 10% | RFC-0005 |
 
 ---
 
@@ -35,9 +35,9 @@ corresponding phase gate is passed.
 
 | Metric | Target | Source RFC |
 |--------|--------|------------|
-| Effect handler dispatch overhead | < 5 ns | RFC-0005 |
-| Async task switch latency | < 1 µs | RFC-0005 |
-| Pure function effect overhead | 0 ns | RFC-0005 |
+| Effect handler dispatch overhead | < 5 ns | RFC-0006 |
+| Async task switch latency | < 1 microsecond | RFC-0006 |
+| Pure function effect overhead | 0 ns | RFC-0006 |
 
 ---
 
@@ -48,7 +48,7 @@ corresponding phase gate is passed.
 | Kernel boot time (if OS integration) | < 1 second | |
 | Context switch | < 300 ns | |
 | Filesystem IOPS | > 1M IOPS | NVMe target |
-| Network stack latency | < 50 µs | Loopback |
+| Network stack latency | < 50 microseconds | Loopback |
 | Startup time (hello world binary) | < 10ms | |
 | Binary size (hello world, stripped) | < 500KB | |
 
