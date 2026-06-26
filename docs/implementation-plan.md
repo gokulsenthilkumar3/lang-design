@@ -82,18 +82,20 @@ support future implementation without ambiguity.
 - `docs/prd.md`
 - `docs/implementation-plan.md`
 - `docs/images/roadmap.svg`
-
-### Next files to create
-
-- `rfcs/RFC-0003-grammar.md`
-- `rfcs/RFC-0004-type-system.md`
-- `rfcs/RFC-0005-memory-model.md`
-- `rfcs/RFC-0006-effect-system.md`
-- `docs/benchmarks/targets.md`
 - `docs/spec/grammar.md`
 - `docs/spec/type-system.md`
 - `docs/spec/memory-model.md`
 - `docs/spec/effects.md`
+- `docs/spec/toolchain.md`
+- `docs/spec/parser.md`
+- `docs/spec/formatter.md`
+
+### Next files to create
+
+- `rfcs/RFC-0008-performance-and-diagnostics.md`
+- `docs/spec/diagnostics.md`
+- `docs/spec/error-recovery.md`
+- `docs/spec/cli.md`
 
 ## Acceptance Gates
 
@@ -109,4 +111,3 @@ support future implementation without ambiguity.
 - If a doc is likely to drift, it should be linked from the README.
 - If the project cannot explain a choice in plain language, the choice needs
   more design work.
-
