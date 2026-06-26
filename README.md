@@ -27,6 +27,12 @@ This repository contains:
 No compiler code lives here yet. The rule: **every line of compiler code must
 have a corresponding accepted RFC.**
 
+Start with the planning docs:
+
+- [Product Requirements Document](docs/prd.md)
+- [Implementation Plan](docs/implementation-plan.md)
+- [Roadmap image](docs/images/roadmap.svg)
+
 ---
 
 ## Vision
@@ -103,6 +109,9 @@ Implementation (future compiler repo)
 6. RFC is merged as **Accepted** or closed as **Rejected**.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+
+For a shorter execution-oriented view, see
+[docs/implementation-plan.md](docs/implementation-plan.md).
 
 ---
 
