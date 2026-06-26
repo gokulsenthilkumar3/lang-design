@@ -11,11 +11,23 @@ corresponding phase gate is passed.
 
 | Metric | Target | Source RFC |
 |--------|--------|------------|
+| Parse 100k LOC | < 2 seconds | RFC-0003 |
 | Type check: 100k LOC | < 5 seconds | RFC-0004 |
 | Refinement check: simple predicate | < 100ms | RFC-0004 |
 | Tensor shape inference: per matmul | < 1ms | RFC-0004 |
 | Type error: actionable message rate | > 90% | RFC-0004 |
 | Compile-time regression per PR | < 2% | RFC-0004 |
+
+---
+
+## Parser and Formatter
+
+| Metric | Target | Source RFC |
+|--------|--------|------------|
+| Recovery on malformed corpus | 100% non-panicking | RFC-0003 |
+| Round-trip stability | `parse(print(ast)) == ast` | RFC-0003 |
+| Formatter idempotence | 100% | RFC-0007 |
+| Formatter should not change meaning | 100% | RFC-0007 |
 
 ---
 
