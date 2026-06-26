@@ -31,6 +31,16 @@ corresponding phase gate is passed.
 
 ---
 
+## Diagnostics
+
+| Metric | Target | Source RFC |
+|--------|--------|------------|
+| Type error: actionable message rate | > 90% | RFC-0008 |
+| First diagnostic latency | < 200ms | RFC-0008 |
+| Diagnostic suggestion acceptance | > 80% | RFC-0008 |
+
+---
+
 ## Memory System
 
 | Metric | Target | Source RFC |
@@ -72,6 +82,8 @@ These targets support RFC-0007 and the later ecosystem phases.
 
 | Metric | Target | Notes |
 |--------|--------|-------|
+| Dependency resolution determinism | 100% | RFC-0009 |
+| Lockfile reproducibility | 100% | RFC-0009 |
 | Package registry: publish time | < 30 seconds | |
 | Package registry: install (cached) | < 1 second | |
 | LSP response time (completions) | < 100ms | |
@@ -89,6 +101,16 @@ These targets support RFC-0007 and the later ecosystem phases.
 | Stdlib test coverage | > 95% line coverage | |
 | Reproducible build: bit-identical output | 100% | Phase 10 gate |
 | CVE response time | < 14 days | SECURITY.md |
+
+---
+
+## Stability
+
+| Metric | Target | Source RFC |
+|--------|--------|------------|
+| ABI stability declaration | Explicit per release | RFC-0010 |
+| Compatibility review coverage | 100% for breaking changes | RFC-0010 |
+| Regression test coverage for compatibility-sensitive changes | 100% | RFC-0010 |
 
 ---
 
