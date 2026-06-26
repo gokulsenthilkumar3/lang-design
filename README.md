@@ -5,7 +5,7 @@
 
 [![CI](https://github.com/gokulsenthilkumar3/lang-design/actions/workflows/ci.yml/badge.svg)](https://github.com/gokulsenthilkumar3/lang-design/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![RFCs](https://img.shields.io/badge/RFCs-9%20active-green.svg)](rfcs/)
+[![RFCs](https://img.shields.io/badge/RFCs-10%20active-green.svg)](rfcs/)
 [![Status](https://img.shields.io/badge/phase-design%20%26%20research-orange.svg)](#roadmap)
 
 ---
@@ -141,6 +141,7 @@ For a shorter execution-oriented view, see
 | [RFC-0007](rfcs/RFC-0007-unified-toolchain.md)                               | Unified Toolchain             | Draft |
 | [RFC-0008](rfcs/RFC-0008-performance-and-diagnostics.md)                     | Performance and Diagnostics   | Draft |
 | [RFC-0009](rfcs/RFC-0009-package-management.md)                              | Package Management            | Draft |
+| [RFC-0010](rfcs/RFC-0010-stability-and-compatibility.md)                     | Stability and Compatibility   | Draft |
 
 ---
 

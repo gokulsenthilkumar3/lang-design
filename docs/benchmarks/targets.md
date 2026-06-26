@@ -104,6 +104,16 @@ These targets support RFC-0007 and the later ecosystem phases.
 
 ---
 
+## Stability
+
+| Metric | Target | Source RFC |
+|--------|--------|------------|
+| ABI stability declaration | Explicit per release | RFC-0010 |
+| Compatibility review coverage | 100% for breaking changes | RFC-0010 |
+| Regression test coverage for compatibility-sensitive changes | 100% | RFC-0010 |
+
+---
+
 ## How to Update This Document
 
 When a new RFC introduces a quantitative target, add it here with the

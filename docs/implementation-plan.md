@@ -95,13 +95,15 @@ support future implementation without ambiguity.
 - `docs/spec/package-management.md`
 - `docs/spec/build-system.md`
 - `docs/spec/lsp.md`
-
-### Next files to create
-
-- `rfcs/RFC-0010-stability-and-compatibility.md`
 - `docs/spec/abi.md`
 - `docs/spec/reproducibility.md`
 - `docs/spec/testing.md`
+
+### Next files to create
+
+- `docs/spec/roadmap-summary.md`
+- `docs/spec/contributing-notes.md`
+- `docs/spec/architecture-overview.md`
 
 ## Acceptance Gates
 
