@@ -32,6 +32,9 @@ Start with the planning docs:
 - [Product Requirements Document](docs/prd.md)
 - [Implementation Plan](docs/implementation-plan.md)
 - [Roadmap image](docs/images/roadmap.svg)
+- [Roadmap Summary](docs/spec/roadmap-summary.md)
+- [Architecture Overview](docs/spec/architecture-overview.md)
+- [Contributing Notes](docs/spec/contributing-notes.md)
 
 ---
 
