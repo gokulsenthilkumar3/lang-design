@@ -1,0 +1,31 @@
+{
+  "default": true,
+  "MD013": false,
+  "MD024": false,
+  "MD033": false,
+  "MD041": false,
+  "MD040": {
+    "allowed_languages": [
+      "lang",
+      "text",
+      "bash",
+      "sh",
+      "yaml",
+      "json",
+      "toml",
+      "rust",
+      "python",
+      "javascript",
+      "typescript",
+      "go",
+      "c",
+      "cpp",
+      "llvm",
+      "bnf",
+      "ebnf",
+      "markdown",
+      "diff"
+    ],
+    "language_only": false
+  }
+}
