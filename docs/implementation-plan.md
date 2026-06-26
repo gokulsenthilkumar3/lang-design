@@ -89,13 +89,16 @@ support future implementation without ambiguity.
 - `docs/spec/toolchain.md`
 - `docs/spec/parser.md`
 - `docs/spec/formatter.md`
-
-### Next files to create
-
-- `rfcs/RFC-0008-performance-and-diagnostics.md`
 - `docs/spec/diagnostics.md`
 - `docs/spec/error-recovery.md`
 - `docs/spec/cli.md`
+
+### Next files to create
+
+- `rfcs/RFC-0009-package-management.md`
+- `docs/spec/package-management.md`
+- `docs/spec/build-system.md`
+- `docs/spec/lsp.md`
 
 ## Acceptance Gates
 

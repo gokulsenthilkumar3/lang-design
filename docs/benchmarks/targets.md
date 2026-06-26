@@ -31,6 +31,16 @@ corresponding phase gate is passed.
 
 ---
 
+## Diagnostics
+
+| Metric | Target | Source RFC |
+|--------|--------|------------|
+| Type error: actionable message rate | > 90% | RFC-0008 |
+| First diagnostic latency | < 200ms | RFC-0008 |
+| Diagnostic suggestion acceptance | > 80% | RFC-0008 |
+
+---
+
 ## Memory System
 
 | Metric | Target | Source RFC |
