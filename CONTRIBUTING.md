@@ -1,150 +1,67 @@
-# Contributing
+# Contributing to lang-design
 
-Thank you for your interest in contributing to this language design project. This document explains how to participate constructively in the research and specification phase.
+Thank you for your interest in contributing. This repository is in the early design phase — the most valuable contributions right now are:
 
----
-
-## What We Accept
-
-During the current **Phase 0 (Research & Architecture)**, the most valuable contributions are:
-
-- **RFC proposals** — new design ideas in the RFC format (see below)
-- **Literature review summaries** — papers, prior art, and relevant language design decisions from other languages
-- **Syntax sketches** — concrete examples of how language features would look and feel
-- **Prototype experiments** — small proof-of-concept implementations exploring a design question
-- **Benchmark baselines** — measurements of existing languages on workloads relevant to this language’s goals
-- **Feedback on open RFCs** — constructive critique, alternative approaches, and edge cases
-
-We do not accept implementation pull requests during Phase 0. The specification must be stable before implementation begins.
+1. **Research findings** — papers, benchmarks, or prior-art discoveries relevant to the design
+2. **RFC feedback** — critique of existing RFCs via PR comments or GitHub Issues
+3. **New RFC proposals** — fully formed proposals for language features or design decisions
 
 ---
 
-## RFC Process
+## Before You Contribute
 
-All language changes, additions, or removals require an RFC (Request for Comments).
-
-### When an RFC Is Required
-
-- Any new syntax or keyword
-- Any change to the type system
-- Any change to the memory or ownership model
-- Any change to the effect system or concurrency model
-- Any addition to the standard library surface area
-- Any change to the build system, package format, or registry protocol
-
-### RFC Lifecycle
-
-1. **Draft** — Author opens a pull request adding `rfcs/RFC-XXXX-title.md`
-2. **Comment period** — Minimum 14 days open for community feedback
-3. **Revision** — Author addresses feedback; RFC is updated
-4. **TSC review** — Technical Steering Committee votes to accept, reject, or request further revision
-5. **Accepted / Rejected** — RFC is merged (accepted) or closed with explanation (rejected)
-
-### RFC Template
-
-Create `rfcs/RFC-XXXX-short-title.md` using this structure:
-
-```markdown
-# RFC-XXXX: Title
-
-**Status:** Draft  
-**Author:** Your Name  
-**Created:** YYYY-MM-DD  
-**Updated:** YYYY-MM-DD  
-
-## Summary
-
-One paragraph. What is being proposed and why.
-
-## Motivation
-
-What problem does this solve? What is the current pain? Why is this the right time?
-
-## Existing Solutions
-
-How do other languages or systems solve this problem? What are their limitations?
-
-## Proposed Design
-
-Detailed specification. Include syntax examples, type rules, and edge cases.
-
-## Alternatives Considered
-
-What other approaches were considered and why were they rejected?
-
-## Drawbacks
-
-What are the costs and risks of this proposal?
-
-## Success Metric
-
-How will we know this RFC’s design is working correctly in practice?
-
-## Open Questions
-
-What is still unresolved? What needs further research?
-```
+- Read [RFC-0001](rfcs/RFC-0001-language-vision-and-non-goals.md) to understand the language vision and non-goals.
+- Browse existing RFCs in `rfcs/` to understand the design direction and avoid duplicating discussions.
+- Check open Issues and PRs for discussions already in progress.
 
 ---
 
-## Architecture Decision Records (ADRs)
+## How to Propose a New RFC
 
-For decisions that are not language-facing but affect the implementation architecture (e.g., IR format, backend choice, registry protocol), we use Architecture Decision Records.
+1. **Open an Issue** using the [New RFC Idea](.github/ISSUE_TEMPLATE/new_rfc_idea.md) template. This validates interest before you spend time writing a full RFC.
 
-Create `docs/decisions/ADR-XXXX-title.md` using this structure:
+2. **Copy the template**: Copy `rfcs/0000-template.md` to `rfcs/RFC-XXXX-short-descriptive-title.md`. Use the next available RFC number.
 
-```markdown
-# ADR-XXXX: Title
+3. **Fill in every section**. The CI workflow checks that `Summary`, `Motivation`, `Open Questions`, and `Alternatives Considered` are all present. A PR with empty sections will not be merged.
 
-**Status:** Proposed | Accepted | Superseded by ADR-XXXX  
-**Date:** YYYY-MM-DD  
+4. **Open a Pull Request**. Use the PR template. Set the RFC status to `Draft`.
 
-## Context
+5. **Respond to feedback**. Update the RFC in response to review comments. Significant changes should be summarised in a comment on the PR so reviewers can track what changed.
 
-What is the situation that requires a decision?
+6. **Acceptance**. An RFC is merged as `Accepted` when there is clear consensus and no unresolved objections. It is closed as `Rejected` with a written reason.
 
-## Options Considered
+---
 
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A | ... | ... | ... |
+## How to Submit a Research Finding
 
-## Decision
+1. Open an Issue using the [Research Finding](.github/ISSUE_TEMPLATE/research_finding.md) template.
+2. If the finding warrants an update to `docs/research/prior-art.md`, open a PR with the update.
+3. If the finding changes an existing RFC, open a PR against that RFC.
 
-Which option was chosen and why.
+---
 
-## Consequences
+## How to Give RFC Feedback
 
-What becomes easier or harder as a result of this decision?
-```
+- For general discussion on an open RFC PR: comment on the PR.
+- For a specific concern on an already-merged RFC: open an Issue using the [RFC Discussion](.github/ISSUE_TEMPLATE/rfc_discussion.md) template.
+
+---
+
+## Writing Style
+
+- Write in clear, direct English. Avoid jargon where plain language works.
+- RFCs are design documents, not academic papers. Precision matters more than formality.
+- Use concrete examples. A syntax sketch is worth ten paragraphs of prose.
+- State tradeoffs honestly. The **Alternatives Considered** and **Drawbacks** sections exist because honest evaluation of tradeoffs is more valuable than advocacy.
 
 ---
 
 ## Code of Conduct
 
-All contributors are expected to follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
+This project follows the [Contributor Covenant v2.1](CODE_OF_CONDUCT.md). All participants are expected to uphold it.
 
 ---
 
-## Commit Style
+## Questions?
 
-Use conventional commits:
-
-```
-type(scope): short description
-
-Longer explanation if needed.
-```
-
-Types: `feat`, `fix`, `docs`, `spec`, `rfc`, `bench`, `chore`
-
-Examples:
-- `spec(type-system): add refinement type layer specification`
-- `rfc(RFC-0003): revise IPC syntax after feedback`
-- `bench(baseline): add Rust vs Go latency comparison`
-
----
-
-## Questions
-
-Open a GitHub Discussion or comment on the relevant RFC. Do not open issues for design questions — use Discussions so the conversation is preserved for future contributors.
+Open an Issue with the `question` label or start a GitHub Discussion.
