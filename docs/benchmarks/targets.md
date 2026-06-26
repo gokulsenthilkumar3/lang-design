@@ -82,6 +82,8 @@ These targets support RFC-0007 and the later ecosystem phases.
 
 | Metric | Target | Notes |
 |--------|--------|-------|
+| Dependency resolution determinism | 100% | RFC-0009 |
+| Lockfile reproducibility | 100% | RFC-0009 |
 | Package registry: publish time | < 30 seconds | |
 | Package registry: install (cached) | < 1 second | |
 | LSP response time (completions) | < 100ms | |
