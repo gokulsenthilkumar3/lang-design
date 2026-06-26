@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-markdown:
+    name: Lint Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Lint all markdown files
+        run: markdownlint '**/*.md' --ignore node_modules --ignore .github/ISSUE_TEMPLATE
+
+  validate-rfc-structure:
+    name: Validate RFC Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check RFC files have required sections
+        run: |
+          echo "Checking RFC files for required sections..."
+          MISSING=0
+          for f in rfcs/RFC-*.md; do
+            for section in "Summary" "Motivation" "Open Questions" "Alternatives Considered"; do
+              if ! grep -q "## $section" "$f"; then
+                echo "MISSING section '$section' in $f"
+                MISSING=1
+              fi
+            done
+          done
+          if [ $MISSING -ne 0 ]; then exit 1; fi
+          echo "All RFC files pass structure check."
