@@ -54,7 +54,9 @@ corresponding phase gate is passed.
 
 ---
 
-## Ecosystem (Phase 7+)
+## Toolchain and Ecosystem
+
+These targets support RFC-0007 and the later ecosystem phases.
 
 | Metric | Target | Notes |
 |--------|--------|-------|
