@@ -221,12 +221,35 @@ project has enough evidence from the remaining RFCs.
 
 ---
 
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — Module Declarations
+
+**Decision:** Module structure is inferred from the file path. Mandatory file-scope module declarations are not required.
+**Rationale:** Requiring a `module a.b.c` declaration at the top of `a/b/c.lang` is redundant ceremony (violates SP1). The file system path serves as the single source of truth for the module hierarchy.
+
+### D2 — `impl` Blocks and Traits
+
+**Decision:** `impl` blocks support exactly one trait per block (e.g., `impl TraitA for Type`).
+**Rationale:** Allowing multiple traits per block makes it difficult to visually determine which trait a specific method belongs to, especially if traits share method names. One trait per block is unambiguous and aligns with SP5 (One Way to Do Common Things).
+
+### D3 — Pattern Guards
+
+**Decision:** Pattern guards (e.g., `match x { Some(v) if v > 0 => ... }`) are deferred to a post-v1.0 RFC.
+**Rationale:** The MVP `match` expression handles structural destructuring. Pattern guards introduce parsing complexity and overlap semantically with `if` expressions, and can be added later without breaking backwards compatibility.
+
+### D4 — Anonymous Function Syntax
+
+**Decision:** Anonymous functions use a shorter arrow form (e.g., `|args| body`), dropping the `fn` keyword.
+**Rationale:** Forcing the `fn` keyword creates visual noise for frequently used iterator chains (e.g., `map`, `filter`), violating SP1 (No Ceremony). The pipe-syntax closure is minimal and well-understood by the target audience.
+
+---
+
 ## Open Questions
 
-- Should module declarations be mandatory at file scope or inferred from path?
-- Should `impl` blocks support multiple traits in one block?
-- Should pattern guards be part of the grammar now or deferred to a later RFC?
-- Should anonymous function syntax reuse `fn` or use a shorter arrow form?
+All open questions have been resolved in the Decisions section above.
 
 ---
 
@@ -235,4 +258,3 @@ project has enough evidence from the remaining RFCs.
 This RFC is successful if parser implementation can proceed without syntax
 debates blocking core language work, and every later RFC can cite a specific
 grammar form rather than inventing one ad hoc.
-

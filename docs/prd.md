@@ -152,4 +152,3 @@ and acceptance gate.
 - [Roadmap](../ROADMAP.md)
 - [RFC-0001](../rfcs/RFC-0001-language-vision-and-non-goals.md)
 - [RFC-0002](../rfcs/RFC-0002-syntax-philosophy.md)
-

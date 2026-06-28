@@ -32,4 +32,3 @@ project sample {
 - Build commands should share resolution logic with publish and install.
 - Package errors should mention the package name and version directly.
 - Tests should cover local, registry, and mixed-source dependencies.
-

@@ -31,4 +31,3 @@ find references
 - Completion should not require full recompilation on every keystroke.
 - Diagnostics should match CLI output for the same source state.
 - Tests should cover latency and correctness for common editor interactions.
-

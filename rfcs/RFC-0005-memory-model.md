@@ -3,102 +3,117 @@
 **Status:** Draft\
 **Author:** Gokul Senthilkumar\
 **Created:** 2026-06-27\
-**Updated:** 2026-06-27
+**Updated:** 2026-06-28\
+**Depends on:** RFC-0001, RFC-0004
 
 ---
 
 ## Summary
 
-This RFC defines the memory model for the language: affine ownership by
-default, region inference for common code, explicit sharing for safe aliasing,
-and capability-gated access to mutation and external resources. The goal is to
-achieve memory safety without a garbage collector while keeping the common case
-lightweight.
+This RFC defines the memory model: affine ownership with region inference,
+no garbage collector, no implicit reference counting, and a defined unsafe
+escape hatch for FFI and kernel-level code. The model must eliminate memory
+safety bugs in the safe subset without requiring explicit lifetime annotations
+in common code.
 
 ---
 
 ## Motivation
 
-The type system RFC establishes that ownership exists, but the memory model
-must spell out how values move, how borrowing works, how regions are inferred,
-and what the compiler guarantees about aliasing. Without a dedicated memory
-model RFC, safety rules would be scattered across implementation notes and the
-compiler would be hard to reason about.
+Memory management is the hardest problem in systems programming. The design
+space has three main options:
+
+- **GC:** Safe but non-deterministic latency, large runtime.
+- **Manual (C/C++):** Fast but memory-unsafe.
+- **Ownership (Rust):** Safe + fast, but explicit lifetimes are a major
+  ergonomic cost.
+
+Goal G1 (RFC-0001) requires safety without GC and without the annotation
+burden of Rust. Region inference is the mechanism: the compiler infers the
+lifetime of most values without programmer annotation.
 
 ---
 
 ## Detailed Design
 
-### Core Rules
+### Ownership Rules
 
-- Values are affine by default.
-- Moves consume the source binding.
-- Shared access is explicit and constrained.
-- Region inference covers common temporary lifetimes.
-- No garbage collector is part of the primary model.
+Every value has exactly one owner at any point in time.
 
-### Syntax
+1. **Move:** Passing a value to a function or assigning it to a new binding
+   transfers ownership. The old binding is invalidated.
+2. **Borrow:** A function can receive a temporary reference (`&T` or `&mut T`)
+   without taking ownership. The borrow must not outlive the owner.
+3. **Clone:** A value can be explicitly duplicated if its type implements
+   `Clone`. Copying is never implicit.
+
+### Region Inference
+
+Lifetimes are inferred by the compiler in the common case. Explicit lifetime
+annotations are required only when:
+
+- A struct stores a reference (the struct's lifetime is tied to the
+  reference's lifetime).
+- A function returns a reference and the compiler cannot determine which
+  input the reference was derived from.
 
 ```lang
-fn first(items: List[Int]) -> Int {
-    let head = items.pop_front()
-    head
+// Common case: no annotation needed
+// Compiler infers that the returned reference lives as long as `list`
+fn first(list: &List[Int]) -> &Int {
+    &list[0]
 }
 
-fn read_twice(path: Path) -> Result[(Str, Str), IOError]
-    requires IO
-{
-    let content = read_file(path)
-    (content.clone(), content)
+// Explicit annotation required: ambiguous which input the return comes from
+fn longer<'a>(a: &'a Str, b: &'a Str) -> &'a Str {
+    if a.len() > b.len() { a } else { b }
 }
 ```
 
-### Semantics
+The goal is that 90%+ of functions need no lifetime annotations.
 
-#### Moves
+### Stack vs Heap Allocation
 
-- Assigning an affine value transfers ownership.
-- Using a moved value is a compile-time error.
-- Copyable primitives may be duplicated implicitly, but only when the type is
-  marked copyable.
+- Values are stack-allocated by default.
+- Heap allocation is explicit via `Box[T]` (owned heap allocation) or
+  `Arc[T]` (atomically reference-counted, for shared ownership).
+- The allocator is pluggable: the default is a region allocator tuned for
+  affine ownership patterns.
 
-#### Borrowing
+```lang
+let stack_val: Point = Point { x: 1.0, y: 2.0 }  // stack
+let heap_val: Box[Point] = Box.new(Point { x: 1.0, y: 2.0 })  // heap
+let shared: Arc[Config] = Arc.new(Config.default())  // shared heap
+```
 
-- Borrowing is available for shared or temporary access.
-- Borrow rules prevent data races and use-after-free patterns.
-- Borrow lifetimes should be inferred where possible.
+### Unsafe Escape Hatch
 
-#### Regions
+The safe subset has no undefined behaviour. For FFI and kernel-level code,
+an `unsafe` block permits:
 
-- Regions are inferred from lexical structure and dataflow.
-- Short-lived values should usually be allocated in the smallest safe region.
-- Region information is an implementation detail unless surfaced in diagnostics.
+- Raw pointer creation and dereference (`*T`, `*mut T`)
+- Calling foreign functions
+- Disabling borrow checker checks for a lexical scope
 
-#### Mutation
+```lang
+unsafe {
+    let raw: *mut Int = allocate(size_of[Int]())
+    *raw = 42
+    let val = *raw
+    deallocate(raw)
+}
+```
 
-- Mutation is explicit in source.
-- Mutable state remains subject to the same ownership and borrow rules.
-- Shared mutable access must be constrained through explicit mechanisms.
+Unsafe blocks are audited by the compiler and flagged in documentation.
+A codebase's `unsafe` surface is visible via `build --unsafe-report`.
 
-#### External Resources
+### Concurrency Memory Model
 
-- File, network, process, and similar resources are capability-gated.
-- Resource handles follow the same ownership rules as ordinary values.
-
-### Type System Impact
-
-- The checker must enforce move semantics, borrow constraints, and region
-  validity.
-- Ownership and region reasoning must integrate with the type inference layer.
-- Diagnostics should explain ownership violations in terms of moves, borrows,
-  and regions rather than implementation internals.
-
-### Toolchain Impact
-
-- The language server should surface move/borrow hints inline.
-- The formatter should make ownership-heavy code visually easy to scan.
-- The compiler needs dedicated diagnostics for use-after-move and invalid
-  borrow paths.
+- Data races are a compile-time error in safe code.
+- Shared mutable state requires `Arc[Mutex[T]]` or similar.
+- The memory model is sequentially consistent within a thread.
+- Cross-thread ordering follows the C++20 memory model (acquire/release).
+- Atomic operations are in stdlib: `Atomic[Int64]`, etc.
 
 ---
 
@@ -106,11 +121,11 @@ fn read_twice(path: Path) -> Result[(Str, Str), IOError]
 
 | Metric | Target | Rationale |
 | --- | --- | --- |
-| Allocation throughput | > 500M alloc/sec | Safety cannot make ordinary allocation unusable |
-| Deallocation throughput | > 500M dealloc/sec | Ownership should stay cheap to drop |
-| GC pause (safe subset) | 0ms | No garbage collector in the primary model |
-| Region allocator overhead vs malloc | < 5% | Inference should not impose large runtime cost |
-| Functions needing lifetime annotations | < 10% | Borrowing should feel inference-first |
+| Allocation throughput | > 500M alloc/sec | General workloads |
+| Deallocation throughput | > 500M dealloc/sec | No GC pauses |
+| Max GC pause | 0ms | No GC in safe subset |
+| Region allocator overhead vs malloc | < 5% | Competitive with C |
+| % functions needing lifetime annotations | < 10% | Ergonomics target |
 
 ---
 
@@ -118,40 +133,68 @@ fn read_twice(path: Path) -> Result[(Str, Str), IOError]
 
 | Option | Description | Tradeoff |
 | --- | --- | --- |
-| Explicit lifetimes everywhere | Require lifetime annotations for all borrows | Simple to specify, heavy to use |
-| Garbage collection | Add GC to simplify memory management | Easier mental model, worse latency and determinism |
-| **Chosen** | Affine ownership with region inference | Best fits systems goals and annotation-light UX |
+| Garbage collector | Safe, ergonomic | Non-deterministic latency |
+| ARC everywhere | Safe, deterministic | Cycle leaks, overhead |
+| Manual (C-style) | Fast | Unsafe |
+| Rust-style explicit lifetimes | Safe, fast | High annotation burden |
+| **Chosen: Affine + Region Inference** | Safe, fast, low annotation burden | Inference limits: ambiguous cases still need annotations |
 
 ---
 
 ## Drawbacks
 
-- Borrow checking and region inference are difficult to implement.
-- Diagnostics must be excellent or the model will feel opaque.
-- Some patterns that are easy in GC languages will require explicit structure.
+- Region inference is a research-grade problem. Getting it right for a
+  production language is hard and time-consuming.
+- The 10% annotation target may be too aggressive; some domains
+  (e.g., self-referential data structures) may require more.
+- Unsafe blocks require ongoing auditing infrastructure.
 
 ---
 
 ## Alternatives Considered
 
-**Garbage-collected ownership model.** Rejected because deterministic systems
-software is a core target.
+**GC (Go/Java style).** Rejected. Incompatible with G1 (systems-capable,
+deterministic latency). GC is available as an opt-in mode for higher-level
+code but not as the default.
 
-**Manual memory management.** Rejected because the design goal is memory safety
-by default.
+**ARC everywhere (Swift).** Rejected. ARC has non-deterministic behaviour at
+cycle boundaries and is unsuitable for latency-critical code paths.
 
-**Rust-style explicit lifetime syntax as the norm.** Rejected because the
-project aims to reduce annotation burden in common code.
+**Rust-style explicit lifetimes.** Partially adopted. The ownership rules are
+identical to Rust. Only the annotation syntax is different: inference-first
+rather than explicit-first.
+
+---
+
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — Region Inference Algorithm
+
+**Decision:** The compiler will use a constraint-based region inference algorithm (similar to Rust's Polonius/NLL).
+**Rationale:** Constraint-based inference maps cleanly to borrow checker rules, avoids the compile-time explosion of full polyhedral analysis, and is a proven approach for tracking ownership states across control flow graphs without heavy annotation burden.
+
+### D2 — `Box` and `Arc` Interaction with Regions
+
+**Decision:** `Box[T]` and `Arc[T]` act as handles to the global heap, escaping lexical regions.
+**Rationale:** While the region allocator handles stack-tied lifetimes, `Box` and `Arc` manage global lifetimes. Region inference tracks borrows *from* these heap objects, but the objects themselves live until explicitly dropped (Box) or the refcount reaches zero (Arc).
+
+### D3 — `unsafe` Granularity
+
+**Decision:** `unsafe` can be applied as both a block (`unsafe { ... }`) and a function attribute (`unsafe fn`).
+**Rationale:** `unsafe fn` marks a function requiring the *caller* to uphold invariants. An `unsafe {}` block allows performing unsafe operations within a function. This dual approach provides the necessary granularity to build safe abstractions over unsafe internals.
+
+### D4 — Raw Pointer Typing
+
+**Decision:** Raw pointers (`*mut T`, `*const T`) have no lifetime bounds and bypass the borrow checker.
+**Rationale:** Trying to type raw pointers defeats the purpose of the escape hatch. Inside an `unsafe` block, memory safety is entirely the programmer's responsibility.
 
 ---
 
 ## Open Questions
 
-- How much region inference is needed in the first implementation?
-- Should shared mutable state require a distinct capability marker?
-- Which resource types should be built into the core runtime, if any?
-- How should the compiler explain aliasing violations in nested data
-  structures?
+All open questions have been resolved in the Decisions section above.
 
 ---
 
@@ -160,4 +203,3 @@ project aims to reduce annotation burden in common code.
 This RFC is successful if memory-safe code remains ergonomic, unsafe aliasing
 is rejected at compile time, and common programs do not require explicit
 lifetime annotations everywhere.
-

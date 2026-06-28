@@ -3,7 +3,7 @@
 **Status:** Draft\
 **Author:** Gokul Senthilkumar\
 **Created:** 2026-06-26\
-**Updated:** 2026-06-26
+**Updated:** 2026-06-28
 
 ---
 
@@ -123,14 +123,66 @@ ignoring the gap.
 
 ---
 
+## Decisions
+
+The following open questions from the original draft are now resolved. This
+section records each decision and the rationale, so future RFC reviewers do
+not need to re-litigate them.
+
+### D1 — Language Name
+
+**Decision:** Naming is formally deferred to Phase 9 (Documentation and
+Community). In the interim, source code examples and tooling use the
+extension `.lang` and the informal working name "lang". The name decision
+does not block any RFC from RFC-0002 onwards; all subsequent RFCs should
+refer to "the language" in prose rather than a proper noun.
+
+**Rationale:** Choosing a permanent name before the community and the design
+are stable creates unnecessary lock-in and is a distraction during Phase 0.
+Every major language (Go was "6g", Rust was "graydon", Swift was "Codename
+Swift") deferred the public name until near the first public release.
+
+### D2 — Scope of NG3 (Research Exclusion)
+
+**Decision:** Dependent types are **explicitly excluded from v1.0** of the
+language. NG3 means: any feature that has no clear path to a practical
+implementation within the Phase 0–7 roadmap timeline will not be included in
+v1.0. A community-maintained "research edition" is permitted after v1.0 if
+there is sufficient interest, but it is not a core deliverable.
+
+**Rationale:** Dependent types require a fundamentally different checker and
+proof obligation model. The opt-in refinement type system (RFC-0004) already
+covers the practical slice of the use cases that motivate dependent types.
+Keeping the door open to dependent types in the core language would delay v1.0
+by years without a proportional user benefit.
+
+### D3 — Definition of "Production Use"
+
+**Decision:** A feature is considered to target production use if all of the
+following are true:
+
+1. It can be implemented within the roadmap phases without blocking a prior
+   phase's gate.
+2. It has a concrete user story in at least one of the three primary user
+   segments (systems engineers, platform engineers, language and tooling
+   engineers).
+3. It does not require ongoing external dependency on research results that
+   are not yet available (e.g., unproven inference algorithms, unpublished
+   proof systems).
+4. Its correctness can be validated by the compiler test suite and/or the
+   benchmark targets in its RFC.
+
+Any feature proposal that cannot satisfy all four criteria is deferred or
+rejected, not included in the core language.
+
+---
+
 ## Open Questions
 
-- Should the language have a name before RFC-0002, or should naming be
-  deferred to Phase 9?
-- Should NG3 (not a research language) explicitly exclude dependent types, or
-  leave the door open for a research edition?
-- How do we define "production use" precisely enough to use as a filter for
-  feature proposals?
+All open questions from the initial RFC-0001 draft have been resolved in the
+Decisions section above. If new questions arise during the review process,
+they will be added here with a corresponding D-numbered decision when
+closed.
 
 ---
 

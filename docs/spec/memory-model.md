@@ -31,4 +31,3 @@ fn duplicate_name(user: User) -> (User, User) {
 - Checker should separate ownership validity from general type unification.
 - Diagnostics should identify the first illegal use after a move.
 - Tests should cover move, borrow, region, and resource handle cases.
-

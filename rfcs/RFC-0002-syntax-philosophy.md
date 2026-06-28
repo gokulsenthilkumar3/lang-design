@@ -129,9 +129,27 @@ programmers is too high for a language targeting production engineering teams.
 
 ---
 
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — `requires` Keyword
+
+**Decision:** The `requires` keyword is shared for both capability constraints and refinement type preconditions.
+**Rationale:** Both represent the same fundamental concept (a precondition the caller must satisfy to invoke the function). Unifying them reduces keyword soup and aligns with SP1 (No Ceremony).
+
+### D2 — Struct Field Defaults
+
+**Decision:** Struct field declarations use `:` for types and `=` for default values (e.g., `x: Float64 = 0.0`).
+**Rationale:** Overloading `:` for defaults makes parsing ambiguous with type inference. Using `=` is unambiguous, standard across modern languages, and aligns with SP2 (Explicit at Boundaries).
+
+### D3 — Function Definition Keyword
+
+**Decision:** The language will use the `fn` keyword for function definitions.
+**Rationale:** It is the shortest option (SP1) and highly familiar to the target audience (Rust users).
+
+---
+
 ## Open Questions
 
-- Should the `requires` keyword for capability constraints be the same keyword
-  as for refinement type preconditions, or should they be distinct?
-- Should struct field declarations use `:` (as above) or `=` for defaults?
-- Should the language use `fn` or `fun` or `def` for function definitions?
+All open questions have been resolved in the Decisions section above.

@@ -10,7 +10,7 @@ corresponding phase gate is passed.
 ## Compiler Performance
 
 | Metric | Target | Source RFC |
-|--------|--------|------------|
+| -------- | -------- | ------------ |
 | Parse 100k LOC | < 2 seconds | RFC-0003 |
 | Type check: 100k LOC | < 5 seconds | RFC-0004 |
 | Refinement check: simple predicate | < 100ms | RFC-0004 |
@@ -23,7 +23,7 @@ corresponding phase gate is passed.
 ## Parser and Formatter
 
 | Metric | Target | Source RFC |
-|--------|--------|------------|
+| -------- | -------- | ------------ |
 | Recovery on malformed corpus | 100% non-panicking | RFC-0003 |
 | Round-trip stability | `parse(print(ast)) == ast` | RFC-0003 |
 | Formatter idempotence | 100% | RFC-0007 |
@@ -34,7 +34,7 @@ corresponding phase gate is passed.
 ## Diagnostics
 
 | Metric | Target | Source RFC |
-|--------|--------|------------|
+| -------- | -------- | ------------ |
 | Type error: actionable message rate | > 90% | RFC-0008 |
 | First diagnostic latency | < 200ms | RFC-0008 |
 | Diagnostic suggestion acceptance | > 80% | RFC-0008 |
@@ -44,7 +44,7 @@ corresponding phase gate is passed.
 ## Memory System
 
 | Metric | Target | Source RFC |
-|--------|--------|------------|
+| -------- | -------- | ------------ |
 | Allocation throughput | > 500M alloc/sec | RFC-0005 |
 | Deallocation throughput | > 500M dealloc/sec | RFC-0005 |
 | GC pause (safe subset) | 0ms (no GC) | RFC-0005 |
@@ -56,7 +56,7 @@ corresponding phase gate is passed.
 ## Effect System
 
 | Metric | Target | Source RFC |
-|--------|--------|------------|
+| -------- | -------- | ------------ |
 | Effect handler dispatch overhead | < 5 ns | RFC-0006 |
 | Async task switch latency | < 1 microsecond | RFC-0006 |
 | Pure function effect overhead | 0 ns | RFC-0006 |
@@ -66,7 +66,7 @@ corresponding phase gate is passed.
 ## Runtime (Phase 5, to be detailed in RFC-0008+)
 
 | Metric | Target | Notes |
-|--------|--------|-------|
+| -------- | -------- | ------- |
 | Kernel boot time (if OS integration) | < 1 second | |
 | Context switch | < 300 ns | |
 | Filesystem IOPS | > 1M IOPS | NVMe target |
@@ -81,7 +81,7 @@ corresponding phase gate is passed.
 These targets support RFC-0007 and the later ecosystem phases.
 
 | Metric | Target | Notes |
-|--------|--------|-------|
+| -------- | -------- | ------- |
 | Dependency resolution determinism | 100% | RFC-0009 |
 | Lockfile reproducibility | 100% | RFC-0009 |
 | Package registry: publish time | < 30 seconds | |
@@ -95,7 +95,7 @@ These targets support RFC-0007 and the later ecosystem phases.
 ## Reliability
 
 | Metric | Target | Notes |
-|--------|--------|-------|
+| -------- | -------- | ------- |
 | Compiler fuzzing: crashes | 0 after 10B inputs | Phase 10 gate |
 | Compiler test coverage | > 95% line coverage | |
 | Stdlib test coverage | > 95% line coverage | |
@@ -107,7 +107,7 @@ These targets support RFC-0007 and the later ecosystem phases.
 ## Stability
 
 | Metric | Target | Source RFC |
-|--------|--------|------------|
+| -------- | -------- | ------------ |
 | ABI stability declaration | Explicit per release | RFC-0010 |
 | Compatibility review coverage | 100% for breaking changes | RFC-0010 |
 | Regression test coverage for compatibility-sensitive changes | 100% | RFC-0010 |

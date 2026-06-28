@@ -3,100 +3,148 @@
 **Status:** Draft\
 **Author:** Gokul Senthilkumar\
 **Created:** 2026-06-27\
-**Updated:** 2026-06-27
+**Updated:** 2026-06-28\
+**Depends on:** RFC-0001, RFC-0004
 
 ---
 
 ## Summary
 
-This RFC defines the effect system for the language. Effects make side
-effects explicit, capability requirements visible, and asynchronous or mutable
-behaviour part of the function signature instead of an invisible convention.
-The design is based on algebraic effects and handlers, but tuned for a
-systems-oriented language with clear capability boundaries.
+This RFC specifies the algebraic effect system: a unified mechanism for IO,
+async/await, error handling, logging, and any user-defined side effect.
+Effects are tracked in the type system. Handlers are first-class and
+composable. The system replaces monads, checked exceptions, and async
+keywords with one consistent mechanism.
 
 ---
 
 ## Motivation
 
-The language vision requires that important behaviours remain visible at the
-boundary. Memory safety alone is not enough; IO, mutation, concurrency, and
-other external interactions must also be explicit. The effect system gives us
-a principled way to model those interactions without forcing the entire
-language into a pure-functional style.
+Most languages have multiple ad-hoc mechanisms for side effects:
+
+- Exceptions for errors
+- `async/await` for concurrency
+- Monads (Haskell) or do-notation for tracked effects
+- Logging via globals or dependency injection
+
+Algebraic effects unify all of these. A function declares which effects it
+needs. The caller decides how to handle them. This makes effects:
+
+- Testable (swap real IO for a mock handler)
+- Composable (multiple effects in one function)
+- Explicit (no hidden global state)
 
 ---
 
 ## Detailed Design
 
-### Core Rules
-
-- Functions declare the effects they may perform.
-- Callers must satisfy the required capabilities.
-- Handlers can localize and reinterpret specific effects.
-- Effects are part of the type signature and checking rules.
-
-### Syntax
+### Defining an Effect
 
 ```lang
-fn write_log(path: Path, message: Str) -> Result[(), IOError]
-    requires IO
-{
-    // ...
+effect Logger {
+    fn log(level: LogLevel, msg: Str) -> ()
 }
 
-fn with_logging[T](action: fn() -> T) -> T
-    handles IO
-{
-    // ...
+effect IO {
+    fn read(path: Path) -> Result[Bytes, IOError]
+    fn write(path: Path, data: Bytes) -> Result[(), IOError]
 }
 
-fn update_state(counter: Counter) -> Counter
-    requires Mut
-{
-    // ...
+effect Random {
+    fn next_u64() -> UInt64
 }
 ```
 
-### Semantics
+### Using an Effect
 
-#### Effect Declarations
+A function that uses an effect declares it in its signature. No annotation
+means pure.
 
-- Effects are declared on function signatures.
-- A function may not perform an undeclared effect.
-- Pure functions have no declared effects.
+```lang
+// Pure function — no effects
+fn add(a: Int, b: Int) -> Int { a + b }
 
-#### Capabilities
+// Effectful function
+fn process(data: Bytes) -> Result[Output, Error]
+    requires IO, Logger
+{
+    Logger.log(Info, "starting")
+    let config = IO.read(Path.from("config.toml"))??
+    // ...
+    Logger.log(Info, "done")
+    Ok(output)
+}
+```
 
-- Capability requirements are checked at call sites.
-- A caller can only invoke an effectful function if the required capability is
-  in scope.
-- Capabilities are explicit values or declarations, not hidden global state.
+### Handling an Effect
 
-#### Handlers
+Effects are handled at the call site using `with` blocks:
 
-- Handlers intercept a specific effect within a lexical scope.
-- Handled effects may be resumed or transformed depending on the handler.
-- The handler semantics must stay compatible with deterministic systems code.
+```lang
+// Production: real IO and stdout logger
+with IO.system(), Logger.stdout() {
+    process(data)
+}
 
-#### Concurrency and Async
+// Test: in-memory IO and captured log
+let logs = Vec.new()
+with IO.memory(files), Logger.capture(&mut logs) {
+    process(data)
+}
+assert(logs.contains("starting"))
+```
 
-- Async tasks are represented through effectful execution rather than an
-  implicit runtime contract.
-- Await-like behaviour should remain explicit in the source.
+### Built-In Effects
 
-### Type System Impact
+| Effect | Description |
+| --- | --- |
+| `IO` | File, network, process IO |
+| `Async` | Cooperative concurrency (replaces async/await) |
+| `Panic` | Unrecoverable errors (replaces unwrap/panic) |
+| `Alloc` | Heap allocation (for no-alloc embedded targets) |
+| `Random` | Random number generation |
+| `Time` | Clock access |
+| `Env` | Environment variables, CLI args |
 
-- Effect annotations participate in function identity.
-- The checker must track capability availability through nested scopes.
-- Effect polymorphism must remain compatible with generics and inference.
+### Async Without Keywords
 
-### Toolchain Impact
+Async is just the `Async` effect. No `async fn`, no `.await`. The scheduler
+is the effect handler.
 
-- Diagnostics should name the missing capability or undeclared effect.
-- The language server should surface effect requirements in hover and inline
-  annotations.
-- The formatter should keep effect clauses aligned with function signatures.
+```lang
+// In other languages: async fn fetch(url: Url) -> Result<Json, Error>
+fn fetch(url: Url) -> Result[Json, Error]
+    requires IO, Async
+{
+    let resp = Http.get(url)??
+    Json.parse(resp.body())
+}
+
+// Scheduling handled by the handler, not the language:
+with Async.tokio_runtime() {
+    let result = fetch(url)
+}
+```
+
+### Effect Polymorphism
+
+Functions can be polymorphic over effects:
+
+```lang
+// Works with any handler for E
+fn retry[E](f: fn() -> Result[T, Error] requires E, times: Int)
+    -> Result[T, Error]
+    requires E
+{
+    for _ in 0..times {
+        match f() {
+            Ok(v) => return Ok(v)
+            Err(_) => continue
+        }
+    }
+    Err(Error.max_retries())
+}
+```
 
 ---
 
@@ -104,9 +152,9 @@ fn update_state(counter: Counter) -> Counter
 
 | Metric | Target | Rationale |
 | --- | --- | --- |
-| Effect handler dispatch overhead | < 5 ns | Effects must remain lightweight |
-| Async task switch latency | < 1 us | Concurrency must stay practical |
-| Pure function effect overhead | 0 ns | Pure code should remain free of effect cost |
+| Effect handler dispatch overhead | < 5 ns | Must not replace zero-cost abstractions |
+| Async task switch latency | < 1 us | Competitive with Tokio/Go runtime |
+| Zero-effect pure function | 0 ns overhead | Pure functions must have no effect machinery cost |
 
 ---
 
@@ -114,44 +162,70 @@ fn update_state(counter: Counter) -> Counter
 
 | Option | Description | Tradeoff |
 | --- | --- | --- |
-| Checked exceptions | Model effects as special return values | Simpler to teach, less expressive |
-| Implicit async runtime | Hide concurrency behind a scheduler | Easier to use, less explicit and harder to reason about |
-| **Chosen** | Algebraic effects with explicit capabilities | Best matches the project goals and the syntax philosophy |
+| Checked exceptions (Java) | Familiar, limited | Viral, not composable |
+| Monads (Haskell) | Sound, composable | Ergonomic burden |
+| async/await (Rust/JS) | Ergonomic | Only handles concurrency |
+| Capabilities (Pony/Wren) | Secure | Less expressive |
+| **Chosen: Algebraic Effects (Koka-style)** | Unified, composable, testable | Dispatch overhead must be benchmarked carefully |
 
 ---
 
 ## Drawbacks
 
-- Effect inference can be complex.
-- Handlers add another conceptual layer for users.
-- The design must avoid turning capabilities into a hidden global state model.
+- Effect types make function signatures longer.
+- Effect polymorphism adds type system complexity.
+- Programmers unfamiliar with algebraic effects face a learning curve.
+- Zero-cost for pure functions must be verified by benchmarking, not assumed.
 
 ---
 
 ## Alternatives Considered
 
-**Checked exceptions only.** Rejected because it is narrower than the project
-needs and does not model concurrency well.
+**Monads (Haskell).** Rejected. Do-notation is an ergonomic barrier. The
+underlying model is correct; the syntax is not.
 
-**Pure async/await without effects.** Rejected because it hides important
-behaviour from the type system.
+**async/await only (Rust/JS/Python).** Rejected. Only handles concurrency.
+Does not unify IO tracking, logging, or error handling.
 
-**Full monadic IO as the primary model.** Rejected because the language aims
-for more accessible syntax.
+**Global state / dependency injection.** Rejected. Hidden side effects are
+untestable. DI frameworks are boilerplate.
+
+---
+
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — Effect Extensibility
+
+**Decision:** Effects are a fixed set of built-in capabilities for v1.0, rather than extensible row types. (Shared with RFC-0004).
+**Rationale:** Row polymorphism severely complicates type inference and error messages. A fixed set covers the vast majority of practical use cases while keeping the type checker fast and predictable.
+
+### D2 — `Panic` vs `?` Operator
+
+**Decision:** The `Panic` effect and the `?` operator are completely orthogonal. `?` does not catch panics.
+**Rationale:** The `?` operator acts on `Result` types for expected, recoverable errors. The `Panic` effect models unrecoverable errors (contract violations, OOM). A specific `catch_panic` handler must be invoked to intercept panics.
+
+### D3 — Handler Scoping
+
+**Decision:** Handlers are exclusive (one handler per effect per scope) rather than stackable.
+**Rationale:** Stackable handlers make it difficult to determine which handler intercepts a call, leading to unexpected behavior and brittle code. The innermost `with` block for an effect completely shadows any outer handlers for that same effect.
+
+### D4 — Zero-Cost Pure Functions
+
+**Decision:** Effect-polymorphic functions are monomorphized into separate pure and effectful copies.
+**Rationale:** When the pure copy of a function (e.g., `map`) is instantiated, all effect-tracking machinery and handler dispatch overhead is completely optimized away, guaranteeing 0 ns overhead for pure invocations.
 
 ---
 
 ## Open Questions
 
-- What is the minimal set of built-in capabilities for v1?
-- Should handler syntax be block-based or expression-based?
-- How should effects interact with trait-like abstraction?
-- Should the language support effect polymorphism in the first release?
+All open questions have been resolved in the Decisions section above.
 
 ---
 
 ## Success Metric
 
 This RFC is successful if programs can clearly express IO, mutation, and
-concurrency requirements, while pure code remains simple and effect-free.
-
+concurrency requirements while pure code remains simple and effect-free,
+and if the system is measurably testable through effect handler substitution.

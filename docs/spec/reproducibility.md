@@ -29,4 +29,3 @@ reproducible_builds = true
 - Toolchain metadata should record the manifest and lockfile inputs used.
 - Integration tests should compare repeated builds of the same project.
 - Failure output should explain which input caused drift.
-

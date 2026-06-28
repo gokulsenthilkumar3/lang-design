@@ -29,4 +29,3 @@ abi = "unstable"
 - Tests should cover compatibility-sensitive boundaries.
 - Release tooling should refuse to imply ABI stability that has not been
   declared.
-

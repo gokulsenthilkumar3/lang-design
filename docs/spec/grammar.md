@@ -35,4 +35,3 @@ parser and formatter work. It is intentionally narrower than the RFC:
 - Error recovery should skip to the next declaration boundary.
 - Formatter should not require semantic analysis to stabilise layout.
 - Round-trip tests should cover examples from RFC-0002 and RFC-0003.
-

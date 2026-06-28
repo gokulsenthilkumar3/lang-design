@@ -39,4 +39,3 @@
 - Use plain language where possible.
 - Prefer concrete examples over abstract argument.
 - Treat alternatives and drawbacks as required parts of the design.
-

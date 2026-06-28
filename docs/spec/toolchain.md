@@ -34,4 +34,3 @@ project sample {
 - Formatting, diagnostics, and package resolution should use shared data
   structures where possible.
 - Integration tests should cover build, format, and LSP workflows together.
-

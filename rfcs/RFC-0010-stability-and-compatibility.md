@@ -136,13 +136,35 @@ semantics and diagnostics also matter.
 
 ---
 
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — Stable ABI Timeline
+
+**Decision:** The first stable ABI will be declared post-v1.0. The v1.0 ABI is explicitly unstable and tied to the compiler version.
+**Rationale:** A stable ABI restricts compiler optimizations (like struct field reordering) too early in the language's life. C-FFI (`#[repr(C)]`) serves as the stable bridge for interoperability.
+
+### D2 — Diagnostic Contracts
+
+**Decision:** Error codes are contractual; diagnostic prose is best-effort.
+**Rationale:** External tools can rely on an error code (e.g., `E0123`) always representing the same semantic violation. The exact wording and suggestions can evolve without being considered a breaking change.
+
+### D3 — Reproducibility Metadata
+
+**Decision:** Reproducibility metadata is exposed via a `build-info.json` artefact.
+**Rationale:** Generated alongside the binary, this file details the exact compiler version, lockfile hash, and target triple used to produce the output for verification.
+
+### D4 — Compatibility Review Triggers
+
+**Decision:** Any change that causes previously compiling safe code to stop compiling requires a compatibility review.
+**Rationale:** Adding new syntax or relaxing restrictions is a routine RFC update. Breaking existing valid code requires a deprecation period and formal compatibility review.
+
+---
+
 ## Open Questions
 
-- When should the project declare the first stable ABI?
-- Which diagnostics are contractual versus best-effort?
-- How should reproducibility metadata be exposed to users?
-- Which classes of change require compatibility review versus routine RFC
-  updates?
+All open questions have been resolved in the Decisions section above.
 
 ---
 
@@ -151,4 +173,3 @@ semantics and diagnostics also matter.
 This RFC is successful if future implementation can evolve without surprising
 users, if build outputs are reproducible, and if stability expectations are
 visible enough to guide both contributors and reviewers.
-

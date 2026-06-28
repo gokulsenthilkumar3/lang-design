@@ -138,12 +138,35 @@ requirement.
 
 ---
 
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — Package Signing
+
+**Decision:** Cryptographic signing is optional for publish, but checksums are mandatory for lockfiles.
+**Rationale:** Mandatory signing creates a massive barrier to entry for early ecosystem adoption. Lockfile hashes (e.g., SHA-256) provide sufficient integrity guarantees for v1.0.
+
+### D2 — Local Paths in Lockfiles
+
+**Decision:** Local path dependencies are tracked in the lockfile by path, but without checksums.
+**Rationale:** Local files mutate constantly during development. Hashing them in the lockfile would break the local dev loop by requiring a lockfile update on every file save.
+
+### D3 — Compatibility Policy
+
+**Decision:** The registry assumes Semantic Versioning (SemVer 2.0.0) by default.
+**Rationale:** SemVer is the industry standard. A `^` requirement is the default and assumes minor versions are backwards-compatible.
+
+### D4 — Compiler Version Pinning
+
+**Decision:** Package metadata must include a minimum supported compiler version (`lang_version`).
+**Rationale:** This prevents users from attempting to compile newer packages with older toolchains, yielding clean "Compiler version X required" errors instead of cryptic syntax failures.
+
+---
+
 ## Open Questions
 
-- Should package signing be mandatory for publish or optional for v1?
-- How should local path dependencies interact with lockfiles?
-- What compatibility policy should the registry assume by default?
-- Should package metadata include minimum supported compiler version?
+All open questions have been resolved in the Decisions section above.
 
 ---
 
@@ -151,4 +174,3 @@ requirement.
 
 This RFC is successful if users can publish, install, and build packages with a
 deterministic dependency graph and without needing separate ecosystem tools.
-

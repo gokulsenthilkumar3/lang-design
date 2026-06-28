@@ -31,4 +31,3 @@ lang test
 - Incremental state should be invalidated by source and manifest changes.
 - Build output should make dependency and target selection visible.
 - Integration tests should cover clean, incremental, and locked builds.
-

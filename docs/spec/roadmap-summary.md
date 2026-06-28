@@ -40,4 +40,3 @@ before the next layer begins:
 
 Use this document as the quick entry point when you want the high-level shape
 of the project without reading every RFC.
-

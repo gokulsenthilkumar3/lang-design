@@ -32,4 +32,3 @@ fn bad_example(a: Int, b: Int) -> Int {
 - Type checker should short-circuit only when continuing would be misleading.
 - Tests should include truncated files, nested syntax errors, and mixed error
   cases.
-

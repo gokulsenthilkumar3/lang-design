@@ -33,4 +33,3 @@ lang lsp
 - Diagnostic rendering should be consistent across commands.
 - Command output should be stable enough for scripts and editors.
 - Help text should explain the unified toolchain model clearly.
-

@@ -32,4 +32,3 @@ fn divide(a: Int, b: Int) -> Int {
 - Language server output should reuse the same structured diagnostic payloads.
 - Tests should cover inference, ownership, effect, refinement, and parser
   diagnostics.
-

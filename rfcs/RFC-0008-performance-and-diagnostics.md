@@ -141,12 +141,35 @@ intent-aware feedback.
 
 ---
 
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — Diagnostic Suggestions
+
+**Decision:** Suggestions will be generated only from curated rules for v1.0.
+**Rationale:** Auto-generated suggestions (e.g., via fuzzy matching) can be noisy and misleading. Curated, high-confidence rules build deep user trust in compiler feedback.
+
+### D2 — Diagnostic Schema
+
+**Decision:** The structured schema will be JSON containing: Code, Severity, Message, Spans, and Help.
+**Rationale:** A structured output mode is required for LSP and editors. The schema must include an error code (e.g., E001), human-readable summary, precise source spans, and an optional curated help field.
+
+### D3 — CLI Context Size
+
+**Decision:** By default, CLI output includes the primary span line plus one line of surrounding context.
+**Rationale:** This keeps terminal output compact and readable. A `--verbose` flag can be used to expand the context window when debugging complex bounds.
+
+### D4 — Regression Blockers
+
+**Decision:** Regressions > 5% on benchmark targets block merge; > 2% yield a warning.
+**Rationale:** Setting a hard 5% threshold ensures the compiler avoids latency creep without making the merge queue overly brittle for minor implementation variance.
+
+---
+
 ## Open Questions
 
-- Should suggestions be generated automatically or only from curated rules?
-- What is the minimal structured diagnostic schema for v1?
-- How much context should the compiler include in CLI output by default?
-- Which performance regressions should block merge versus warn only?
+All open questions have been resolved in the Decisions section above.
 
 ---
 
@@ -155,4 +178,3 @@ intent-aware feedback.
 This RFC is successful if developers can keep moving after compiler failures,
 understand what went wrong without reading internal solver jargon, and trust
 that ordinary edits still compile quickly enough for an interactive workflow.
-

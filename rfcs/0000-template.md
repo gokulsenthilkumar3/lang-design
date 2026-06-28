@@ -56,10 +56,10 @@ How does this affect the compiler, package manager, LSP, or formatter?
 
 ## Innovation Backlog
 
-| Option       | Description | Tradeoff    |
-| ------------ | ----------- | ----------- |
-| Option A     | ...         | ...         |
-| Option B     | ...         | ...         |
+| Option       | Description | Tradeoff     |
+| ------------ | ----------- | ------------ |
+| Option A     | ...         | ...          |
+| Option B     | ...         | ...          |
 | **Chosen**   | ...         | Why this one |
 
 ---

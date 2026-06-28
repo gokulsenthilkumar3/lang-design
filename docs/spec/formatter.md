@@ -35,4 +35,3 @@ fn add(a: Int, b: Int) -> Int {
 - Formatter should align signatures, effect clauses, and block bodies
   predictably.
 - Formatting rules should be kept in sync with the syntax RFCs.
-

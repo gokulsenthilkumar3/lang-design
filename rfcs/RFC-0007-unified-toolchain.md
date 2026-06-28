@@ -165,14 +165,35 @@ experience, not an optional extra.
 
 ---
 
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — Manifest Format
+
+**Decision:** The minimum manifest format for v1 is TOML.
+**Rationale:** TOML is the industry standard for systems language manifests (e.g., Cargo, Poetry). It is highly readable, deterministic, and maps cleanly to the required `[project]` and `[dependencies]` configuration structures.
+
+### D2 — Local vs Registry Packages
+
+**Decision:** The package manager will support both registry-based and local path sources from day one.
+**Rationale:** Local path dependencies (e.g., `path = "../local-lib"`) are critical for multi-package monorepo development and rapid local iteration before publishing.
+
+### D3 — Formatter Rules Boundaries
+
+**Decision:** The syntax RFC defines block structure; this RFC (Toolchain) defines formatting rules.
+**Rationale:** RFC-0003 mandates parsing is whitespace-insensitive. This RFC explicitly declares the canonical style (e.g., 4-space indents, 100-character line width). The formatter is the single source of truth for the latter, preventing overlap.
+
+### D4 — REPL Scope
+
+**Decision:** The REPL shares full compiler features rather than a reduced capability mode.
+**Rationale:** A reduced-capability REPL creates a "works here, fails there" gap. The REPL uses the exact same frontend parsing and type-checking pipeline as the compiler, running in a JIT or AST-interpreter execution mode.
+
+---
+
 ## Open Questions
 
-- What is the minimum manifest format needed for v1?
-- Should the package manager be strictly registry-based or allow local sources?
-- Which formatter rules can be inferred from the syntax RFC versus declared
-  explicitly here?
-- Should the REPL share all compiler features or run in a reduced capability
-  mode?
+All open questions have been resolved in the Decisions section above.
 
 ---
 
@@ -181,4 +202,3 @@ experience, not an optional extra.
 This RFC is successful if a developer can install one binary, create one
 project manifest, and use the same toolchain for build, format, package, and
 language-server workflows without switching mental models.
-

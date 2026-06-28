@@ -40,4 +40,3 @@ fn clamp(value: Int, low: Int, high: Int) -> Int
 - Solver should separate inference, ownership, refinement, and effect passes.
 - Diagnostics should be grouped by root cause, not by internal pass name.
 - Test fixtures should cover successful inference and deliberate failure cases.
-

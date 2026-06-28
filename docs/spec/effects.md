@@ -31,4 +31,3 @@ fn read_and_parse(path: Path) -> Result[Config, IOError]
 - Checker should track capabilities through nested scopes.
 - Handler resolution should be deterministic.
 - Diagnostics should mention the missing effect or capability directly.
-

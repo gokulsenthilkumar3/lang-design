@@ -50,4 +50,3 @@ between:
 - Build and package orchestration.
 - Language server and editor integration.
 - Testing, reproducibility, and release hardening.
-

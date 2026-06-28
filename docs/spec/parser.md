@@ -35,4 +35,3 @@ fn add(a: Int, b: Int) -> Int {
 - Parse tests should cover both valid and malformed samples from RFC-0003.
 - Parser and formatter should share enough structure to support round-trip
   tests.
-

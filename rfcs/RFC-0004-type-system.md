@@ -3,126 +3,177 @@
 **Status:** Draft\
 **Author:** Gokul Senthilkumar\
 **Created:** 2026-06-27\
-**Updated:** 2026-06-27
+**Updated:** 2026-06-28\
+**Depends on:** RFC-0001, RFC-0002, RFC-0003
 
 ---
 
 ## Summary
 
-This RFC defines the core type system for the language: Hindley-Milner
-inference as the default model, affine ownership as the safety layer,
-refinement types as an opt-in verification layer, effect typing as the
-mechanism for visible capabilities, and first-class tensor shape types for
-AI-oriented workloads.
+This RFC specifies the type system: a Hindley-Milner core extended with affine
+types, opt-in refinement types, algebraic effects, first-class tensor shapes,
+and a capability system. The type system must be decidable in the common case
+and produce actionable error messages.
 
 ---
 
 ## Motivation
 
-The grammar RFC tells us how code looks, but not how it behaves. We need a
-coherent type model before parser and compiler work starts, because ownership,
-refinement, effects, and tensor shapes all interact. Without this RFC, later
-implementation work would be forced to guess at the rules.
+The type system is the central correctness mechanism of the language. Every
+goal in RFC-0001 either depends on or is expressed through the type system:
+
+- G1 (memory safety) → affine ownership types
+- G2 (gradual formalism) → opt-in refinement types
+- G3 (intent-aware compiler) → semantic type annotations
+- G5 (AI-native) → tensor shape types
+- G6 (WASM) → type-directed compilation targets
+
+The design must be sound (no well-typed program has undefined behaviour in
+the safe subset), decidable (type checking terminates), and ergonomic
+(inference eliminates annotations in the common case).
 
 ---
 
 ## Detailed Design
 
-### Type System Layers
+### Core: Hindley-Milner with Extensions
 
-The type system is intentionally layered:
+The base type system is Algorithm W (Hindley-Milner). This gives:
 
-1. Core Hindley-Milner inference handles the common case.
-2. Affine ownership guarantees memory safety without GC.
-3. Refinement types add opt-in proofs for local correctness.
-4. Effect types make capabilities and side effects visible.
-5. Tensor shape types support array-heavy and AI workloads.
+- Complete type inference in the common case
+- Parametric polymorphism (generics)
+- Decidable type checking
 
-### Syntax
+Extensions are layered on top, each with a defined interaction with the
+HM core.
+
+### Primitive Types
 
 ```lang
-fn add(a: Int, b: Int) -> Int {
-    a + b
-}
+// Integers
+Int8, Int16, Int32, Int64, Int128
+UInt8, UInt16, UInt32, UInt64, UInt128
+Int    // platform-native signed integer (64-bit on 64-bit targets)
+UInt   // platform-native unsigned integer
 
-fn swap[T](value: (T, T)) -> (T, T) {
-    (value.1, value.0)
-}
+// Floats (IEEE 754)
+Float16, Float32, Float64
 
+// Other primitives
+Bool
+Char   // Unicode scalar value (32-bit)
+Str    // UTF-8 string slice (fat pointer: ptr + len)
+Bytes  // byte slice
+()     // unit type (zero-size, return type of effectful functions)
+```
+
+### Composite Types
+
+```lang
+// Tuple
+(Int, Str, Bool)
+
+// Array (fixed size, stack-allocated)
+[Int; 8]    // array of 8 Ints
+
+// Slice (fat pointer: ptr + len)
+[Int]
+
+// Struct
+struct Point { x: Float64, y: Float64 }
+
+// Enum (sum type, tagged union)
+enum Option[T] { Some(T), None }
+enum Result[T, E] { Ok(T), Err(E) }
+
+// Function type
+(Int, Int) -> Int
+
+// Generic type
+struct List[T] { ... }
+```
+
+### Affine Types (Ownership)
+
+Every value has exactly one owner. Ownership can be transferred (moved) but
+not copied unless the type implements `Clone`.
+
+```lang
+// T — owned value (affine: used exactly once unless cloned)
+// &T — shared reference (many readers, no writers)
+// &mut T — exclusive reference (one writer, no readers)
+```
+
+The compiler infers borrows in most cases. Explicit `&` and `&mut` are
+required only at public API boundaries (SP2 from RFC-0002).
+
+### Refinement Types (Opt-In)
+
+Refinement types attach logical predicates to values. They are opt-in:
+a function without a `#[verify]` attribute has no refinement constraints.
+
+```lang
+// Refined type alias
+type NonZeroInt = Int where self != 0
+type Probability = Float64 where self >= 0.0 && self <= 1.0
+type SortedList[T: Ord] = List[T] where self.is_sorted()
+
+// Precondition and postcondition
 #[verify]
-fn divide(a: Int, b: Int) -> Int
-    requires b != 0
+fn divide(a: Int, b: NonZeroInt) -> Int
+    ensures result * b == a
 {
     a / b
 }
-
-fn read_config(path: Path) -> Result[Str, IOError]
-    requires IO
-{
-    // ...
-}
-
-fn matmul(a: Tensor[Float32, (M, K)], b: Tensor[Float32, (K, N)]) -> Tensor[Float32, (M, N)] {
-    // ...
-}
 ```
 
-### Semantics
+The verifier is an SMT solver (Z3 or CVC5) invoked at compile time for
+`#[verify]`-annotated functions only.
 
-#### Hindley-Milner Core
+### Tensor Shape Types
 
-- The compiler infers types in ordinary functions by default.
-- Type annotations are required at public boundaries, recursive knots, and
-  places where inference would otherwise be ambiguous.
-- Type inference must remain decidable in the core language.
+Tensor dimensions are part of the type. Shape mismatches are caught at
+compile time.
 
-#### Affine Ownership
+```lang
+// Tensor[dtype, shape]
+let w: Tensor[Float32, (768, 768)] = Tensor.zeros()
+let x: Tensor[Float32, (1, 768)]   = embed(token)
 
-- Values are affine by default: they may be used at most once unless explicitly
-  shared through an allowed reference or copyable primitive.
-- Moves consume the source binding.
-- Borrowing is inferred in common cases; explicit lifetime annotations are not
-  the default user experience.
-- The compiler must reject aliasing patterns that would break memory safety.
+// matmul checks: (1,768) x (768,768) -> (1,768)
+let y = matmul(x, w)  // type: Tensor[Float32, (1, 768)]
 
-#### Refinement Types
+// Shape error caught at compile time:
+let bad = matmul(w, x)  // error: shape mismatch (768,768) x (1,768)
+```
 
-- Refinement types are opt-in per function or block.
-- A refinement obligation can only reference values and predicates visible at
-  the boundary.
-- The compiler should treat refinement failures as structured proof failures,
-  not as ordinary type mismatches.
+Dimension variables allow polymorphic shapes:
 
-#### Effects and Capabilities
+```lang
+fn matmul[M, K, N](
+    a: Tensor[Float32, (M, K)],
+    b: Tensor[Float32, (K, N)]
+) -> Tensor[Float32, (M, N)] { ... }
+```
 
-- Any operation that may touch IO, concurrency, mutation, or external systems
-  must declare the required capability.
-- Effect annotations become part of function identity and call-site checking.
-- Effect handlers will be specified in the effect-system RFC, but the type
-  system must reserve the necessary surface syntax now.
+### Effect Types (Capabilities)
 
-#### Tensor Shapes
+Effects are part of the function type. A function that performs IO must
+declare it:
 
-- Tensor shapes participate in inference where possible.
-- Shape variables are part of the type, not a runtime detail.
-- Shape mismatches must produce direct diagnostics that name the conflicting
-  dimensions.
+```lang
+fn read_file(path: Path) -> Result[Str, IOError]
+    requires IO
+{ ... }
 
-### Type System Impact
+// Composing effects
+fn fetch_and_log(url: Url) -> Result[Json, Error]
+    requires IO, Logger
+{ ... }
+```
 
-- The parser must understand generic parameter syntax and refinement clauses.
-- The checker must unify inference, ownership, refinement, and effect rules
-  without exposing internal solver terminology to users.
-- Error messages should explain the semantic cause and point to the offending
-  construct.
-
-### Toolchain Impact
-
-- The formatter must preserve canonical type annotation layout.
-- The language server should expose inferred types, ownership notes, and effect
-  requirements.
-- The compiler needs diagnostic categories for inference, ownership, and
-  refinement failures.
+A function with no `requires` clause is pure. Purity is verified by the
+compiler: calling an effectful function from a pure context is a type error.
 
 ---
 
@@ -130,11 +181,10 @@ fn matmul(a: Tensor[Float32, (M, K)], b: Tensor[Float32, (K, N)]) -> Tensor[Floa
 
 | Metric | Target | Rationale |
 | --- | --- | --- |
-| Type check: 100k LOC | < 5 seconds | Core compile-time usability target |
-| Refinement check: simple predicate | < 100ms | Verification must stay interactive |
-| Tensor shape inference: per matmul | < 1ms | Shape reasoning must not dominate compile time |
-| Type error: actionable message rate | > 90% | Diagnostics are part of the design |
-| Functions needing lifetime annotations | < 10% | Ownership should feel inference-first |
+| Type check: 100k LOC codebase | < 5 seconds | Developer-loop speed |
+| Type error: actionable message rate | > 90% | Measured by user study |
+| Refinement check: simple predicate | < 100ms | Must not break the loop |
+| Tensor shape inference: per matmul | < 1ms | Used in hot paths |
 
 ---
 
@@ -142,40 +192,63 @@ fn matmul(a: Tensor[Float32, (M, K)], b: Tensor[Float32, (K, N)]) -> Tensor[Floa
 
 | Option | Description | Tradeoff |
 | --- | --- | --- |
-| HM + explicit annotations everywhere | Keep inference minimal and require more user markup | Simpler compiler, heavier syntax burden |
-| Full dependent types | Express arbitrarily rich properties in types | Powerful but too heavy for the initial product |
-| **Chosen** | HM core with affine ownership, opt-in refinement, and effect typing | Balances practicality, safety, and gradual formalism |
+| Pure HM | Hindley-Milner only, no extensions | Fast, limited expressiveness |
+| Dependent types | Full dependent types (Agda/Idris) | Too complex for daily use |
+| Gradual typing | Mix typed and untyped | Unsound boundaries |
+| **Chosen: HM + Affine + Opt-in Refinement** | HM core, affine ownership, refinement opt-in | Decidable, ergonomic, sound |
 
 ---
 
 ## Drawbacks
 
-- The solver is more complex than plain HM.
-- Ownership inference can become hard to explain if diagnostics are weak.
-- Refinements and effects will require careful phase gating to avoid scope creep.
+- Two-phase compilation (HM + SMT for verified functions) adds complexity.
+- Tensor shape types require the compiler to do symbolic dimension arithmetic.
+- Effect types make function signatures longer at public API boundaries.
 
 ---
 
 ## Alternatives Considered
 
-**Plain HM only.** Rejected because it cannot express the memory and effect
-model needed by the project.
+**Full dependent types (Agda/Idris style).** Rejected. Proof burden is too
+high for everyday programming. Gradual formalism is the correct tradeoff.
 
-**Rust-style explicit borrows everywhere.** Rejected because the project goal
-is to reduce annotation burden in common code.
+**Gradual typing (TypeScript style).** Rejected. Unsound type boundaries
+undermine the memory safety guarantee. The safe subset must be sound.
 
-**Dependent types as the default.** Rejected because the design goal is
-gradual formalism, not a proof-heavy language.
+**Monad-based effects (Haskell style).** Rejected. Monadic syntax is a
+barrier. Algebraic effects give the same tracking with better ergonomics.
+
+---
+
+## Decisions
+
+The following open questions from the original draft have been resolved:
+
+### D1 — Tensor Shape Resolution
+
+**Decision:** Dimension variables are resolved at compile time primarily, with an explicit dynamic marker (e.g., `Dyn` or `?`) for runtime shapes.
+**Rationale:** A purely static system rejects valid ML models with dynamic shapes (like sequence lengths). The compiler verifies statically where known, but permits runtime checking when explicitly requested via the dynamic marker.
+
+### D2 — Effect Extensibility
+
+**Decision:** Effects are a fixed set of built-in capabilities for v1.0, rather than extensible row types.
+**Rationale:** Row polymorphism severely complicates type inference and error messages. A fixed set (IO, Async, Panic, Alloc, Random, Time, Env) covers the vast majority of practical use cases while keeping the type checker fast and predictable.
+
+### D3 — Refinement Types and Generics
+
+**Decision:** Generic parameters can carry refinement bounds (e.g., `T: Ord where T > 0`).
+**Rationale:** The compiler treats the predicate as an uninterpreted assumption during generic type checking. When instantiated with a concrete type, the SMT solver verifies the bound holds.
+
+### D4 — `Clone` Trait Integration
+
+**Decision:** `Clone` is a compiler-known trait (Lang item).
+**Rationale:** The affine type system (RFC-0005) must enforce "move by default" and explicitly track duplication. Therefore, `Clone` cannot be a pure library construct; the compiler needs intrinsic knowledge of it to validate ownership transfers.
 
 ---
 
 ## Open Questions
 
-- What subset of refinements is decidable and practical for v1?
-- How much ownership inference is enough before explicit annotations become
-  necessary?
-- Should tensor shapes support symbolic arithmetic in the first release?
-- How should effect polymorphism interact with generic functions?
+All open questions have been resolved in the Decisions section above.
 
 ---
 
@@ -184,4 +257,3 @@ gradual formalism, not a proof-heavy language.
 This RFC is successful if most ordinary code type-checks without annotations,
 ownership rules prevent unsafe aliasing, refinements stay opt-in, and the
 compiler can explain failures in plain language.
-
